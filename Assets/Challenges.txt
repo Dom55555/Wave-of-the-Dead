@@ -1,0 +1,2 @@
+Rotation of bullet blue axis
+Camera center and shooting properly
