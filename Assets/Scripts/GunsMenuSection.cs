@@ -12,21 +12,40 @@ public class GunsMenuSection: MonoBehaviour
     public TMP_Text firerate;
     public TMP_Text ammoType;
     public Image image;
+    public Button button;
     public string chosenGun;
+
+    public Slider slider;
+    public Button[] guns;
 
     public GunShooting player;
     public Gamemanager game;
 
+    float startpos;
+
+    void Start()
+    {
+        startpos = guns[0].transform.position.y;
+        int i = 0;
+        foreach (var gun in guns)
+        {
+            float y = startpos - (i / 2) * 250;
+            gun.transform.position = new Vector3(gun.transform.position.x, y, gun.transform.position.z);
+            i++;
+        }
+    }
     void Update()
     {
         
     }
     public void GunChosen(string name)
     {
+        button.gameObject.SetActive(true);
+        image.gameObject.SetActive(true);
         chosenGun = name;
         gunName.text = name;
         damage.text = "Damage: " + game.gunsProperties[name]["damage"];
-        firerate.text = "Firerate: " + game.gunsProperties[name]["firerate"];
+        firerate.text = "Firerate: " + game.gunsProperties[name]["firerate"]+"s";
         ammoType.text = "Ammo: " + game.gunsProperties[name]["ammoType"];
         image.sprite = Resources.Load<Sprite>($"Images/Guns/{name}");
     }
@@ -47,6 +66,16 @@ public class GunsMenuSection: MonoBehaviour
             {
                 print("Not enough money");
             }
+        }
+    }
+    public void OnScrolling(float value)
+    {
+        int i = 0;
+        foreach (var gun in guns)
+        {
+            float y = startpos - (i / 2) * 250 + value * 800;
+            gun.transform.position = new Vector3(gun.transform.position.x,y,gun.transform.position.z);
+            i++;
         }
     }
 }

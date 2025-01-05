@@ -8,8 +8,10 @@ public class Gamemanager : MonoBehaviour
     public Player player;
     public GameObject playerObject;
     public GameObject shop;
-    public int Money = 0;
+    public GameObject gunsMenu;
 
+
+    public int Money = 0;
     public bool canShoot = true;
 
     public Dictionary<string, Dictionary<string, string>> gunsProperties = new Dictionary<string, Dictionary<string, string>>();
@@ -51,5 +53,9 @@ public class Gamemanager : MonoBehaviour
     {
         shop.SetActive(!shop.activeSelf);
         canShoot = !canShoot;
+        if(gunsMenu.activeSelf)
+        {
+            gunsMenu.SetActive(false);
+        }
     }
 }
