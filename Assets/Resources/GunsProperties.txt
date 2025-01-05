@@ -1,0 +1,12 @@
+Pistol 0 15,0 0,15 9mm 16
+Shotgun 250 25,0 0,6 20gauge 8
+Deagle 750 50.0 0.5 44Magnum 0
+Ak47 1500 10.0 0.1 none 0
+M249 7500 0 0 none 0
+M4A1 3250 0 0 none 0
+Famas 6000 0 0 none 0
+Spas12 8500 0 0 none 0
+RailGun 14750 0 0 none 0
+LaserGun 0 0 0 none 0
+Flamethrower 0 0 0 none 0
+RocketLauncher 0 0 0 none 0

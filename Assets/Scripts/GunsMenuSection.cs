@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -11,30 +12,41 @@ public class GunsMenuSection: MonoBehaviour
     public TMP_Text firerate;
     public TMP_Text ammoType;
     public Image image;
+    public string chosenGun;
+
+    public GunShooting player;
+    public Gamemanager game;
+
     void Update()
     {
         
     }
     public void GunChosen(string name)
     {
+        chosenGun = name;
         gunName.text = name;
-        switch (name)
-        {
-            case "Pistol":
-                damage.text = "Damage: 10";
-                firerate.text = "Firerate: 0.15s";
-                ammoType.text = "Ammo: 9mm";
-                break;
-            case "Shotgun":
-                damage.text = "Damage: 25x3";
-                firerate.text = "Firerate: 0.6s";
-                ammoType.text = "Ammo: 20 gauge";
-                break;
-        }
+        damage.text = "Damage: " + game.gunsProperties[name]["damage"];
+        firerate.text = "Firerate: " + game.gunsProperties[name]["firerate"];
+        ammoType.text = "Ammo: " + game.gunsProperties[name]["ammoType"];
         image.sprite = Resources.Load<Sprite>($"Images/Guns/{name}");
     }
     public void GetGun()
     {
-
+        GameObject gunPrefab = Resources.Load<GameObject>($"GunPrefabs/{chosenGun}");
+        if (bool.Parse(game.gunsProperties[chosenGun]["owned"]))
+        {
+            player.ChangeGun(gunPrefab);
+        }
+        else
+        {
+            if (game.Money >= int.Parse(game.gunsProperties[chosenGun]["price"]))
+            {
+                game.Money -= int.Parse(game.gunsProperties[chosenGun]["price"]);
+            }
+            else
+            {
+                print("Not enough money");
+            }
+        }
     }
 }

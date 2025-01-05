@@ -34,8 +34,6 @@ public class GunShooting : MonoBehaviour
             timer = 0f;
         }
         timer += Time.deltaTime;
-
-        
     }
 
     void Shoot()
@@ -69,15 +67,7 @@ public class GunShooting : MonoBehaviour
             GameObject bullet = Instantiate(bulletPrefab, gunMuzzle.position, Quaternion.LookRotation(direction));
 
             Bullet Bul = bullet.GetComponent<Bullet>();
-            switch (currentGun.name)
-            {
-                case "Pistol":
-                    Bul.damage = 10f;
-                    break;
-                case "Shotgun":
-                    Bul.damage = 25f;
-                    break;
-            }
+            Bul.damage = float.Parse(game.gunsProperties[currentGun.name]["damage"]);
             Bul.gunType = currentGun.name;
         }
     }
@@ -88,14 +78,13 @@ public class GunShooting : MonoBehaviour
         currentGun.transform.SetParent(gunSlot.transform);
         gunMuzzle = currentGun.transform.Find("GunMuzzle");
         currentGun.name = newGun.name;
-        switch (currentGun.name)
+        if(currentGun.name == "Pistol")
         {
-            case "Pistol":
-                fireRate = 0.15f;
-                break;
-            case "Shotgun":
-                fireRate = 0.6f;
-                break;
+            fireRate = 0.15f;
+        }
+        else
+        {
+            fireRate = float.Parse(game.gunsProperties[currentGun.name]["firerate"]);
         }
     }
 }
