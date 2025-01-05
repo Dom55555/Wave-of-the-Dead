@@ -14,6 +14,7 @@ public class GunsMenuSection: MonoBehaviour
     public Image image;
     public Button button;
     public string chosenGun;
+    public RectTransform area;
 
     public Slider slider;
     public Button[] guns;
@@ -25,12 +26,13 @@ public class GunsMenuSection: MonoBehaviour
 
     void Start()
     {
-        startpos = guns[0].transform.position.y;
+        startpos = guns[0].transform.localPosition.y;
         int i = 0;
+        float parentHeight = area.rect.height;
         foreach (var gun in guns)
         {
-            float y = startpos - (i / 2) * 250;
-            gun.transform.position = new Vector3(gun.transform.position.x, y, gun.transform.position.z);
+            float y = startpos - (i / 2) * (parentHeight * 0.45f);
+            gun.transform.localPosition = new Vector3(gun.transform.localPosition.x, y, gun.transform.localPosition.z);
             i++;
         }
     }
@@ -71,11 +73,19 @@ public class GunsMenuSection: MonoBehaviour
     public void OnScrolling(float value)
     {
         int i = 0;
+        float parentHeight = area.rect.height; 
         foreach (var gun in guns)
         {
-            float y = startpos - (i / 2) * 250 + value * 800;
-            gun.transform.position = new Vector3(gun.transform.position.x,y,gun.transform.position.z);
+            float y = startpos - (i / 2) * (parentHeight * 0.45f) + value * (parentHeight * 0.8f);
+            gun.transform.localPosition = new Vector3(gun.transform.localPosition.x, y, gun.transform.localPosition.z);
             i++;
         }
-    }
+        //int i = 0;
+        //foreach (var gun in guns)
+        //{
+        //    float y = startpos - (i / 2) * 250 + value * 800;
+        //    gun.transform.position = new Vector3(gun.transform.position.x, y, gun.transform.position.z);
+        //    i++;
+
+        }
 }
