@@ -11,7 +11,6 @@ public class Player : MonoBehaviour
 
     public bool cursorVisible = false;
 
-    public Transform playerBody;
     public Transform cameraTransform;
     public Image aim;
     public Gamemanager game;
@@ -45,16 +44,16 @@ public class Player : MonoBehaviour
         recoilToReach = Mathf.Clamp(recoilToReach, -4, 0);
         if (!reachedRecoilRotation)
         {
-            currentRecoil = Mathf.Lerp(currentRecoil,recoilToReach,Time.deltaTime*recoilReachSpeed);
-            if(currentRecoil<=recoilToReach)
+            currentRecoil = Mathf.Lerp(currentRecoil, recoilToReach, Time.deltaTime * recoilReachSpeed);
+            if (currentRecoil <= recoilToReach)
             {
                 currentRecoil = recoilToReach;
                 reachedRecoilRotation = true;
             }
         }
-        if(reachedRecoilRotation)
+        if (reachedRecoilRotation)
         {
-            currentRecoil = Mathf.Lerp(currentRecoil, 0,Time.deltaTime*recoilReturnSpeed);
+            currentRecoil = Mathf.Lerp(currentRecoil, 0, Time.deltaTime * recoilReturnSpeed);
         }
         cameraTransform.localRotation = Quaternion.Euler(verticalRotation + currentRecoil, 0f, 0f);
 
@@ -62,12 +61,8 @@ public class Player : MonoBehaviour
 
     void MovePlayer()
     {
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
-
-        Vector3 moveDirection = transform.right * horizontal + transform.forward * vertical;
-        Vector3 newPosition = rb.position + moveDirection * moveSpeed * Time.deltaTime;
-        rb.MovePosition(newPosition);
+        Vector2 velocity = new Vector2(Input.GetAxis("Horizontal") * moveSpeed, Input.GetAxis("Vertical") * moveSpeed);
+        rb.velocity = transform.rotation * new Vector3(velocity.x, rb.velocity.y, velocity.y);
     }
 
     void MouseRotateCamera()
@@ -75,7 +70,7 @@ public class Player : MonoBehaviour
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
 
-        playerBody.Rotate(Vector3.up * mouseX);
+        transform.Rotate(Vector3.up * mouseX);
 
         verticalRotation -= mouseY;
         verticalRotation = Mathf.Clamp(verticalRotation, -90f, 90f);
@@ -92,4 +87,5 @@ public class Player : MonoBehaviour
         reachedRecoilRotation = false;
         recoilToReach -= recoilPower;
     }
+
 }

@@ -50,8 +50,7 @@ public class GunShooting : MonoBehaviour
         }
         foreach(var gun in game.guns)
         {
-            var props = gun.Value;
-            props.firerateTimer = props.firerateTimer + Time.deltaTime;
+            gun.Value.firerateTimer = gun.Value.firerateTimer + Time.deltaTime;
         }
         reloadTimer += Time.deltaTime;
     }
@@ -94,7 +93,10 @@ public class GunShooting : MonoBehaviour
     }
     public void ChangeGun(GameObject newGun)
     {
-        Destroy(currentGun);
+        if(currentGun!=null)
+        {
+            Destroy(currentGun);
+        }
         reloading = false;
         reloadTimer = 0;
         currentGun = Instantiate(newGun, gunSlot.position, playerCamera.transform.rotation);
