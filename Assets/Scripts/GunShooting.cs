@@ -58,6 +58,7 @@ public class GunShooting : MonoBehaviour
 
     void Shoot()
     {
+        transform.gameObject.GetComponent<Player>().Recoil(game.guns[currentGun.name].recoilPower);
         Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
         RaycastHit hit;
 

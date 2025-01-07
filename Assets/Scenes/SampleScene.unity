@@ -1866,13 +1866,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52167f379fee70245a95ebc329c8c55e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 5
+  moveSpeed: 0.8
   mouseSensitivity: 2
+  recoilDecreaseSpeed: 2
+  recoilReachSpeed: 40
+  recoilReturnSpeed: 6
+  cursorVisible: 0
   playerBody: {fileID: 206579355}
   cameraTransform: {fileID: 580145623}
   aim: {fileID: 1884427274}
   game: {fileID: 1735549579}
-  cursorVisible: 0
 --- !u!136 &206579352
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -2008,6 +2011,8 @@ MonoBehaviour:
   playerCamera: {fileID: 580145625}
   maxRange: 20
   fireRate: 0.15
+  reloading: 0
+  currentGun: {fileID: 0}
 --- !u!1 &208608981
 GameObject:
   m_ObjectHideFlags: 0
@@ -14184,11 +14189,13 @@ MonoBehaviour:
   player: {fileID: 206579351}
   playerObject: {fileID: 206579350}
   moneyText: {fileID: 1954268234}
+  ammoText: {fileID: 1766739572}
+  gunNameText: {fileID: 1957362821}
   shop: {fileID: 1996915501}
   gunsMenu: {fileID: 462535949}
   ammoMenu: {fileID: 147747419}
   Money: 90000
-  canShoot: 1
+  inMenu: 0
 --- !u!4 &1735549580
 Transform:
   m_ObjectHideFlags: 0

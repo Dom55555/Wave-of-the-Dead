@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class HeadBobbing : MonoBehaviour
 {
-    public float bobbingSpeed = 16f;
-    public float bobbingAmount = 0.025f;
-    public float returnSpeed = 2f;
+    public float bobbingSpeed = 14f;
+    public float bobbingAmount = 0.028f;
+    public float returnSpeed = 1.5f;
 
     private float defaultYPosition;
     private float timer = 0f;
@@ -34,4 +34,5 @@ public class HeadBobbing : MonoBehaviour
             transform.localPosition = new Vector3(transform.localPosition.x, smoothY, transform.localPosition.z);
         }
     }
+    
 }

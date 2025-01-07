@@ -33,11 +33,12 @@ public class Gamemanager : MonoBehaviour
         public string ammoType;
         public int magazineSize;
         public float reloadTime;
+        public float recoilPower;
         public bool owned;
         public int currentMagazine;
         public float firerateTimer;
 
-        public Gun(string Name,int Price,float Damage,float Firerate,string AmmoType,int MagazineSize,float ReloadTime,bool Owned, int CurrentMagazine, float FirerateTimer)
+        public Gun(string Name,int Price,float Damage,float Firerate,string AmmoType,int MagazineSize,float ReloadTime,float RecoilPower,bool Owned, int CurrentMagazine, float FirerateTimer)
         {
             name = Name;
             price = Price;
@@ -46,6 +47,7 @@ public class Gamemanager : MonoBehaviour
             ammoType = AmmoType;
             magazineSize = MagazineSize;
             reloadTime = ReloadTime;
+            recoilPower = RecoilPower;
             owned = Owned;
             currentMagazine = CurrentMagazine;
             firerateTimer = FirerateTimer;
@@ -72,7 +74,7 @@ public class Gamemanager : MonoBehaviour
         foreach (var line in lines) //setting guns properties and values
         {
             string[] parts = line.Split();
-            guns.Add(parts[0],new Gun(parts[0], int.Parse(parts[1]),float.Parse(parts[2]), float.Parse(parts[3]), parts[4], int.Parse(parts[5]), float.Parse(parts[6]), false,0,0));
+            guns.Add(parts[0],new Gun(parts[0], int.Parse(parts[1]),float.Parse(parts[2]), float.Parse(parts[3]), parts[4], int.Parse(parts[5]), float.Parse(parts[6]), float.Parse(parts[7]),false,0,0));
         }
         guns["Pistol"].owned = true;
         //setting ammo details

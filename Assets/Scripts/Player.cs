@@ -1,12 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Animations;
 using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
-    public float moveSpeed = 0.5f;
+    public float moveSpeed = 3f;
     public float mouseSensitivity = 2f;
+
+    public bool cursorVisible = false;
 
     public Transform playerBody;
     public Transform cameraTransform;
@@ -14,7 +17,12 @@ public class Player : MonoBehaviour
     public Gamemanager game;
 
     float verticalRotation = 0f;
-    public bool cursorVisible = false;
+    float recoilToReach = 0f;
+    float currentRecoil = 0f;
+    float recoilReachSpeed = 50f;
+    float recoilReturnSpeed = 6f;
+    float recoilDecreaseSpeed = 3f;
+    bool reachedRecoilRotation = true;
 
     Rigidbody rb;
 
@@ -31,8 +39,25 @@ public class Player : MonoBehaviour
         MovePlayer();
         if (!cursorVisible)
         {
-            RotateCamera();
+            MouseRotateCamera();
         }
+        recoilToReach += Time.deltaTime * recoilDecreaseSpeed;
+        recoilToReach = Mathf.Clamp(recoilToReach, -4, 0);
+        if (!reachedRecoilRotation)
+        {
+            currentRecoil = Mathf.Lerp(currentRecoil,recoilToReach,Time.deltaTime*recoilReachSpeed);
+            if(currentRecoil<=recoilToReach)
+            {
+                currentRecoil = recoilToReach;
+                reachedRecoilRotation = true;
+            }
+        }
+        if(reachedRecoilRotation)
+        {
+            currentRecoil = Mathf.Lerp(currentRecoil, 0,Time.deltaTime*recoilReturnSpeed);
+        }
+        cameraTransform.localRotation = Quaternion.Euler(verticalRotation + currentRecoil, 0f, 0f);
+
     }
 
     void MovePlayer()
@@ -41,11 +66,11 @@ public class Player : MonoBehaviour
         float vertical = Input.GetAxis("Vertical");
 
         Vector3 moveDirection = transform.right * horizontal + transform.forward * vertical;
-        Vector3 newPosition = rb.position + moveDirection * moveSpeed * 0.01f;
+        Vector3 newPosition = rb.position + moveDirection * moveSpeed * Time.deltaTime;
         rb.MovePosition(newPosition);
     }
 
-    void RotateCamera()
+    void MouseRotateCamera()
     {
         float mouseX = Input.GetAxis("Mouse X") * mouseSensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * mouseSensitivity;
@@ -54,8 +79,6 @@ public class Player : MonoBehaviour
 
         verticalRotation -= mouseY;
         verticalRotation = Mathf.Clamp(verticalRotation, -90f, 90f);
-
-        cameraTransform.localRotation = Quaternion.Euler(verticalRotation, 0f, 0f);
     }
     public void ToggleCursor()
     {
@@ -63,5 +86,10 @@ public class Player : MonoBehaviour
         Cursor.visible = cursorVisible;
         Cursor.lockState = cursorVisible ? CursorLockMode.None : CursorLockMode.Locked;
         aim.gameObject.SetActive(!cursorVisible);
+    }
+    public void Recoil(float recoilPower)
+    {
+        reachedRecoilRotation = false;
+        recoilToReach -= recoilPower;
     }
 }
