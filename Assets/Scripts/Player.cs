@@ -20,7 +20,7 @@ public class Player : MonoBehaviour
 
     void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked; 
+        Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         aim.gameObject.SetActive(true);
         rb = GetComponent<Rigidbody>();
@@ -29,7 +29,7 @@ public class Player : MonoBehaviour
     void Update()
     {
         MovePlayer();
-        if(!cursorVisible)
+        if (!cursorVisible)
         {
             RotateCamera();
         }
@@ -41,7 +41,7 @@ public class Player : MonoBehaviour
         float vertical = Input.GetAxis("Vertical");
 
         Vector3 moveDirection = transform.right * horizontal + transform.forward * vertical;
-        Vector3 newPosition = rb.position + moveDirection * moveSpeed*0.01f;
+        Vector3 newPosition = rb.position + moveDirection * moveSpeed * 0.01f;
         rb.MovePosition(newPosition);
     }
 
@@ -59,8 +59,8 @@ public class Player : MonoBehaviour
     }
     public void ToggleCursor()
     {
-        cursorVisible = !cursorVisible; 
-        Cursor.visible = cursorVisible; 
+        cursorVisible = !cursorVisible;
+        Cursor.visible = cursorVisible;
         Cursor.lockState = cursorVisible ? CursorLockMode.None : CursorLockMode.Locked;
         aim.gameObject.SetActive(!cursorVisible);
     }

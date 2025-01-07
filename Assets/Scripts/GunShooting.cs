@@ -28,29 +28,30 @@ public class GunShooting : MonoBehaviour
     }
     void Update()
     {
-        if (Input.GetMouseButtonDown(0) && !game.inMenu && float.Parse(game.gunsProperties[currentGun.name]["firerateTimer"]) >= fireRate && !reloading) 
+        int loadedAmmo= game.guns[currentGun.name].currentMagazine;
+        int maxSize= game.guns[currentGun.name].magazineSize;
+        int totalAmmo = game.playerAmmo[game.guns[currentGun.name].ammoType].totalAmount;
+        if (Input.GetMouseButtonDown(0) && !game.inMenu && game.guns[currentGun.name].firerateTimer >= fireRate && !reloading && loadedAmmo>0) 
         {
-            game.gunsProperties[currentGun.name]["firerateTimer"] = "0";
+            game.guns[currentGun.name].firerateTimer = 0;
+            game.guns[currentGun.name].currentMagazine = game.guns[currentGun.name].currentMagazine - 1;
             Shoot();
         }
-        int loadedAmmo= int.Parse(game.gunsProperties[currentGun.name]["currentMagazine"]);
-        int maxSize= int.Parse(game.gunsProperties[currentGun.name]["magazineSize"]);
-        int totalAmmo = game.playerAmmo[game.gunsProperties[currentGun.name]["ammoType"]][1];
         if (Input.GetKeyDown(KeyCode.R) && !reloading && !game.inMenu && loadedAmmo < maxSize && totalAmmo > 0)
         {
             reloading = true;
             reloadTimer = 0f;
         }
-        if(reloading && reloadTimer > float.Parse(game.gunsProperties[currentGun.name]["reloadTime"]))
+        if(reloading && reloadTimer > game.guns[currentGun.name].reloadTime)
         {
             ReloadGun();
             reloading=false;
             reloadTimer = 0f;
         }
-        foreach(var gun in game.gunsProperties)
+        foreach(var gun in game.guns)
         {
             var props = gun.Value;
-            props["firerateTimer"] = (float.Parse(props["firerateTimer"])+Time.deltaTime).ToString();
+            props.firerateTimer = props.firerateTimer + Time.deltaTime;
         }
         reloadTimer += Time.deltaTime;
     }
@@ -86,8 +87,8 @@ public class GunShooting : MonoBehaviour
             GameObject bullet = Instantiate(bulletPrefab, gunMuzzle.position, Quaternion.LookRotation(direction));
 
             Bullet Bul = bullet.GetComponent<Bullet>();
-            Bul.damage = float.Parse(game.gunsProperties[currentGun.name]["damage"]);
             Bul.gunType = currentGun.name;
+            Bul.damage = game.guns[currentGun.name].damage;
         }
     }
     public void ChangeGun(GameObject newGun)
@@ -105,21 +106,21 @@ public class GunShooting : MonoBehaviour
         }
         else
         {
-            fireRate = float.Parse(game.gunsProperties[currentGun.name]["firerate"]);
+            fireRate = game.guns[currentGun.name].firerate;
         }
     }
     public void ReloadGun()
     {
-        int currentMagazineAmount = int.Parse(game.gunsProperties[currentGun.name]["currentMagazine"]);
-        int magazineSize = int.Parse(game.gunsProperties[currentGun.name]["magazineSize"]);
-        string ammoType = game.gunsProperties[currentGun.name]["ammoType"];
-        int totalAmmo = game.playerAmmo[ammoType][1];
+        int currentMagazineAmount = game.guns[currentGun.name].currentMagazine;
+        int magazineSize = game.guns[currentGun.name].magazineSize;
+        string ammoType = game.guns[currentGun.name].ammoType;
+        int totalAmmo = game.playerAmmo[ammoType].totalAmount;
         int reloadAmount = magazineSize - currentMagazineAmount;
         if(totalAmmo<reloadAmount)
         {
             reloadAmount = totalAmmo;
         }
-        game.gunsProperties[currentGun.name]["currentMagazine"] = (currentMagazineAmount+reloadAmount).ToString();
-        game.playerAmmo[ammoType][1] = totalAmmo - reloadAmount;
+        game.guns[currentGun.name].currentMagazine = currentMagazineAmount + reloadAmount;
+        game.playerAmmo[ammoType].totalAmount = totalAmmo - reloadAmount;
     }
 }

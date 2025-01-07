@@ -4,11 +4,11 @@ using UnityEngine;
 
 public class HeadBobbing : MonoBehaviour
 {
-    public float bobbingSpeed = 16f; 
-    public float bobbingAmount = 0.025f; 
+    public float bobbingSpeed = 16f;
+    public float bobbingAmount = 0.025f;
     public float returnSpeed = 2f;
 
-    private float defaultYPosition; 
+    private float defaultYPosition;
     private float timer = 0f;
 
     void Start()

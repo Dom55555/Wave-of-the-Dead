@@ -34,16 +34,16 @@ public class AmmoMenuSection : MonoBehaviour
 
         chosenAmmo = name;
         ammoName.text = chosenAmmo;
-        currentAmount.text = "Left: " + game.playerAmmo[chosenAmmo][1].ToString();
+        currentAmount.text = "Left: " + game.playerAmmo[chosenAmmo].totalAmount.ToString();
         buyAmount.text = "Amount: " + ammoAmount;
-        buyButtonText.text = "Buy for " + game.playerAmmo[chosenAmmo][0] * ammoAmount + " $";
+        buyButtonText.text = "Buy for " + game.playerAmmo[chosenAmmo].price * ammoAmount + " $";
         ammoImage.sprite = Resources.Load<Sprite>($"Images/Ammo/{name}");
     }
     public void OnChangingAmount(float value)
     {
         ammoAmount = (int)value;
         buyAmount.text = "Amount: " + ammoAmount;
-        buyButtonText.text = "Buy for " + game.playerAmmo[chosenAmmo][0] * ammoAmount + " $";
+        buyButtonText.text = "Buy for " + game.playerAmmo[chosenAmmo].price * ammoAmount + " $";
 
     }
     public void OnOpenMenu()
@@ -55,16 +55,16 @@ public class AmmoMenuSection : MonoBehaviour
         }
         if(chosenAmmo!=null)
         {
-            currentAmount.text = "Left: " + game.playerAmmo[chosenAmmo][1].ToString();
+            currentAmount.text = "Left: " + game.playerAmmo[chosenAmmo].totalAmount.ToString();
         }
     }
     public void Buy()
     {
-        if(game.Money>= game.playerAmmo[chosenAmmo][0] * ammoAmount)
+        if(game.Money>= game.playerAmmo[chosenAmmo].price * ammoAmount) // price * amount
         {
-            game.Money -= game.playerAmmo[chosenAmmo][0] * ammoAmount;
-            game.playerAmmo[chosenAmmo][1] += ammoAmount;
-            currentAmount.text = "Left: "+game.playerAmmo[chosenAmmo][1].ToString();
+            game.Money -= game.playerAmmo[chosenAmmo].price * ammoAmount;
+            game.playerAmmo[chosenAmmo].totalAmount += ammoAmount;
+            currentAmount.text = "Left: "+game.playerAmmo[chosenAmmo].totalAmount.ToString();
         }
         else
         {

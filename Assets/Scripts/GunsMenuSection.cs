@@ -35,28 +35,28 @@ public class GunsMenuSection: MonoBehaviour
         image.gameObject.SetActive(true);
         chosenGun = name;
         gunName.text = name;
-        damage.text = "Damage: " + game.gunsProperties[name]["damage"];
+        damage.text = "Damage: " + game.guns[name].damage.ToString();
         if(chosenGun == "Shotgun"||chosenGun == "Spas-12")
         {
             damage.text += "x3";
         }
-        firerate.text = "Firerate: " + game.gunsProperties[name]["firerate"]+"s";
-        ammoType.text = "Ammo: " + game.gunsProperties[name]["ammoType"];
+        firerate.text = "Firerate: " + game.guns[name].firerate.ToString()+"s";
+        ammoType.text = "Ammo: " + game.guns[name].ammoType;
         image.sprite = Resources.Load<Sprite>($"Images/Guns/{name}");
     }
     public void GetGun()
     {
         GameObject gunPrefab = Resources.Load<GameObject>($"GunPrefabs/{chosenGun}");
-        if (bool.Parse(game.gunsProperties[chosenGun]["owned"]))
+        if (game.guns[chosenGun].owned)
         {
             player.ChangeGun(gunPrefab);
         }
         else
         {
-            if (game.Money >= int.Parse(game.gunsProperties[chosenGun]["price"]))
+            if (game.Money >= game.guns[chosenGun].price)
             {
-                game.Money -= int.Parse(game.gunsProperties[chosenGun]["price"]);
-                game.gunsProperties[chosenGun]["owned"] = "True";
+                game.Money -= game.guns[chosenGun].price;
+                game.guns[chosenGun].owned = true;
                 Button gun = guns.Find(gun=>gun.name==chosenGun);
                 TMP_Text[] texts = gun.GetComponentsInChildren<TMP_Text>();
                 texts[1].text = "Owned";
@@ -89,8 +89,8 @@ public class GunsMenuSection: MonoBehaviour
         foreach (var gun in guns)
         {
             TMP_Text[] texts = gun.GetComponentsInChildren<TMP_Text>();
-            texts[1].text = game.gunsProperties[gun.name]["price"] + "$";
-            if (game.gunsProperties[gun.name]["owned"] == "True")
+            texts[1].text = game.guns[gun.name].price.ToString() + "$";
+            if (game.guns[gun.name].owned)
             {
                 texts[1].text = "Owned";
             }
