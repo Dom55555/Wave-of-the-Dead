@@ -5,9 +5,8 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
-    public float moveSpeed = 5f;
+    public float moveSpeed = 0.5f;
     public float mouseSensitivity = 2f;
-
 
     public Transform playerBody;
     public Transform cameraTransform;
@@ -17,11 +16,14 @@ public class Player : MonoBehaviour
     float verticalRotation = 0f;
     public bool cursorVisible = false;
 
+    Rigidbody rb;
+
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked; 
         Cursor.visible = false;
         aim.gameObject.SetActive(true);
+        rb = GetComponent<Rigidbody>();
     }
 
     void Update()
@@ -39,8 +41,8 @@ public class Player : MonoBehaviour
         float vertical = Input.GetAxis("Vertical");
 
         Vector3 moveDirection = transform.right * horizontal + transform.forward * vertical;
-
-        transform.Translate(moveDirection * moveSpeed * Time.deltaTime, Space.World);
+        Vector3 newPosition = rb.position + moveDirection * moveSpeed*0.01f;
+        rb.MovePosition(newPosition);
     }
 
     void RotateCamera()

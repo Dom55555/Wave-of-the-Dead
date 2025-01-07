@@ -1,12 +1,13 @@
-Pistol 0 15,0 0,15 9mm 16
-Shotgun 250 25,0 0,6 20gauge 8
-Deagle 750 50.0 0.5 44Magnum 0
-Ak47 1500 10.0 0.1 none 0
-M249 7500 0 0 none 0
-M4A1 3250 0 0 none 0
-Famas 6000 0 0 none 0
-Spas12 8500 0 0 none 0
-RailGun 14750 0 0 none 0
-LaserGun 0 0 0 none 0
-Flamethrower 0 0 0 none 0
-RocketLauncher 0 0 0 none 0
+Pistol 0 15,0 0,15 9mm 12 1,5
+Shotgun 250 25,0 0,6 12gauge 6 3,0
+Deagle 750 50,0 0,8 44Magnum 7 2,5
+AK-47 2500 20,0 0,14 7.62mm 30 2,8
+MP7 3250 17,0 0,07 4.6mm 40 2,5
+Famas 5000 23,0 0,08 5.56mm 25 2,6
+Spas-12 8500 45,0 1,0 12gauge 8 3,5
+AWM 10000 125,0 1,0 7.62mm 5 3,8
+Railgun 13750 175,0 1,25 7.62mm 3 4,0
+M249 15000 15,0 0,06 5.56mm 100 5,0
+LaserGun 17500 35,0 0,7 none 10 1,7
+Flamethrower 18000 4,0 0,06 none 100 0
+RocketLauncher 25000 200,0 0 none 1 4,5

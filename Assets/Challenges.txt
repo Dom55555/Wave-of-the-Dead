@@ -1,3 +1,2 @@
-Rotation of bullet blue axis
-Camera center and shooting properly
-UI boundaries with RectMask2D
+
+Camera center and shooting properly with Ray
