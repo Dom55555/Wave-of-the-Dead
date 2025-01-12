@@ -1,11 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    public float speed = 1f;        
-    public float lifetime = 3f;     
+    public float speed = 28f;        
+    public float lifetime = 1f;     
     public float damage = 10f;    
     public string gunType = "Pistol";
 
@@ -17,14 +18,16 @@ public class Bullet : MonoBehaviour
     void Update()
     {
         transform.Translate(Vector3.forward * speed * Time.deltaTime);
-
-        if (gunType == "Shotgun")
+        if (gunType == "Shotgun" || gunType == "Spas-12")
         {
-            damage = Mathf.Round(Mathf.Clamp(damage-Time.deltaTime*20,0,25));
+            damage = Mathf.Clamp(damage-Time.deltaTime*20,0,25);
         }
     }
     void OnCollisionEnter(Collision collision)
     {
-        Destroy(gameObject);
+        if(collision.gameObject.name != "PLAYER")
+        {
+            Destroy(gameObject);
+        }
     }
 }

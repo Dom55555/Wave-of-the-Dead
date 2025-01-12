@@ -2,24 +2,25 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net.Http.Headers;
 using Unity.VisualScripting;
+using UnityEditor.Build.Content;
 using UnityEngine;
 
 public class GunShooting : MonoBehaviour
 {
     public Gamemanager game;  
     
-    public GameObject bulletPrefab;
+    public GameObject currentGun;
     public Transform gunSlot;     
     public Camera playerCamera;
+    public GameObject defaultBulletPrefab;
+    public GameObject flameBulletPrefab;
 
     public float maxRange = 20f;
     public float fireRate = 0.15f;
     public bool reloading = false;
 
-    public GameObject currentGun;
     Transform gunMuzzle;
     float reloadTimer = 0f;
-
 
     void Start()
     {
@@ -31,12 +32,41 @@ public class GunShooting : MonoBehaviour
         int loadedAmmo= game.guns[currentGun.name].currentMagazine;
         int maxSize= game.guns[currentGun.name].magazineSize;
         int totalAmmo = game.playerAmmo[game.guns[currentGun.name].ammoType].totalAmount;
-        if (Input.GetMouseButtonDown(0) && !game.inMenu && game.guns[currentGun.name].firerateTimer >= fireRate && !reloading && loadedAmmo>0) 
+        //shooting
+        if(!game.inMenu && game.guns[currentGun.name].firerateTimer >= fireRate && !reloading && loadedAmmo > 0)
         {
-            game.guns[currentGun.name].firerateTimer = 0;
-            game.guns[currentGun.name].currentMagazine = game.guns[currentGun.name].currentMagazine - 1;
-            Shoot();
+            if (!game.guns[currentGun.name].isAutomatic)
+            {
+                if (Input.GetMouseButtonDown(0)) 
+                {
+                    Shoot();
+                }
+            }
+            else
+            {
+                if (Input.GetMouseButton(0))
+                {
+                    if(currentGun.name == "Flamethrower" && !currentGun.transform.Find("Flames").GetComponent<ParticleSystem>().isPlaying)
+                    {
+                        currentGun.transform.Find("Flames").GetComponent<ParticleSystem>().Play();
+                    }
+                    Shoot();
+                }
+                else
+                {
+                    if (currentGun.name == "Flamethrower" && currentGun.transform.Find("Flames").GetComponent<ParticleSystem>().isPlaying)
+                    {
+                        currentGun.transform.Find("Flames").GetComponent<ParticleSystem>().Stop();
+                    }
+                }
+            }
         }
+        if(currentGun.name == "Flamethrower"&&loadedAmmo==0)
+        {
+            currentGun.transform.Find("Flames").GetComponent<ParticleSystem>().Stop();
+        }
+
+        //reloading
         if (Input.GetKeyDown(KeyCode.R) && !reloading && !game.inMenu && loadedAmmo < maxSize && totalAmmo > 0)
         {
             reloading = true;
@@ -57,12 +87,15 @@ public class GunShooting : MonoBehaviour
 
     void Shoot()
     {
+        game.guns[currentGun.name].firerateTimer = 0;
+        game.guns[currentGun.name].currentMagazine = game.guns[currentGun.name].currentMagazine - 1;
+        currentGun.GetComponent<AudioSource>().PlayOneShot(currentGun.GetComponent<AudioSource>().clip);
+
         transform.gameObject.GetComponent<Player>().Recoil(game.guns[currentGun.name].recoilPower);
         Ray ray = playerCamera.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
         RaycastHit hit;
-
         Vector3 targetPoint;
-        if (Physics.Raycast(ray, out hit, maxRange))
+        if (Physics.Raycast(ray, out hit, maxRange) && hit.collider.gameObject.name != "Bullet")
         {
             targetPoint = hit.point;
         }
@@ -84,19 +117,28 @@ public class GunShooting : MonoBehaviour
                 Quaternion spread = Quaternion.Euler(new Vector3(Random.Range(-1.5f, 1.5f),Random.Range(-1.5f, 1.5f),0f));
                 direction = spread * direction;
             }
-            GameObject bullet = Instantiate(bulletPrefab, gunMuzzle.position, Quaternion.LookRotation(direction));
-
+            GameObject bullet;
+            if(currentGun.name!="Flamethrower")
+            {
+                bullet = Instantiate(defaultBulletPrefab, gunMuzzle.position, Quaternion.LookRotation(direction));
+            }
+            else
+            {
+                bullet = Instantiate(flameBulletPrefab, gunMuzzle.position, Quaternion.LookRotation(direction));
+            }
             Bullet Bul = bullet.GetComponent<Bullet>();
+            if(currentGun.name == "Flamethrower")
+            {
+                Bul.lifetime = 2f;
+                Bul.speed = 1.5f;
+            }
             Bul.gunType = currentGun.name;
             Bul.damage = game.guns[currentGun.name].damage;
         }
     }
     public void ChangeGun(GameObject newGun)
     {
-        if(currentGun!=null)
-        {
-            Destroy(currentGun);
-        }
+        Destroy(currentGun); 
         reloading = false;
         reloadTimer = 0;
         currentGun = Instantiate(newGun, gunSlot.position, playerCamera.transform.rotation);
@@ -105,7 +147,7 @@ public class GunShooting : MonoBehaviour
         currentGun.name = newGun.name;
         if(currentGun.name == "Pistol")
         {
-            fireRate = 0.15f;
+            fireRate = 0.11f;
         }
         else
         {

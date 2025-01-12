@@ -37,8 +37,9 @@ public class Gamemanager : MonoBehaviour
         public bool owned;
         public int currentMagazine;
         public float firerateTimer;
+        public bool isAutomatic;
 
-        public Gun(string Name,int Price,float Damage,float Firerate,string AmmoType,int MagazineSize,float ReloadTime,float RecoilPower,bool Owned, int CurrentMagazine, float FirerateTimer)
+        public Gun(string Name,int Price,float Damage,float Firerate,string AmmoType,int MagazineSize,float ReloadTime,float RecoilPower,bool Owned, int CurrentMagazine, float FirerateTimer, bool IsAutomatic)
         {
             name = Name;
             price = Price;
@@ -51,6 +52,7 @@ public class Gamemanager : MonoBehaviour
             owned = Owned;
             currentMagazine = CurrentMagazine;
             firerateTimer = FirerateTimer;
+            isAutomatic = IsAutomatic;
         }
     }
     public class Ammo
@@ -71,13 +73,12 @@ public class Gamemanager : MonoBehaviour
     {
         TextAsset textAsset = Resources.Load<TextAsset>("GunsProperties");
         string[] lines = textAsset.text.Split(new char[] { '\n', '\r' }, System.StringSplitOptions.RemoveEmptyEntries);
-        foreach (var line in lines) //setting guns properties and values
+        foreach (var line in lines)
         {
             string[] parts = line.Split();
-            guns.Add(parts[0],new Gun(parts[0], int.Parse(parts[1]),float.Parse(parts[2]), float.Parse(parts[3]), parts[4], int.Parse(parts[5]), float.Parse(parts[6]), float.Parse(parts[7]),false,0,0));
+            guns.Add(parts[0],new Gun(parts[0], int.Parse(parts[1]),float.Parse(parts[2]), float.Parse(parts[3]), parts[4], int.Parse(parts[5]), float.Parse(parts[6]), float.Parse(parts[7]),false,0,0, bool.Parse(parts[8])));
         }
         guns["Pistol"].owned = true;
-        //setting ammo details
         playerAmmo.Add("9mm", new Ammo("9mm",7,0));
         playerAmmo.Add("12gauge", new Ammo("12gauge", 10, 0));
         playerAmmo.Add("7.62mm", new Ammo("7.62mm", 11, 0));
