@@ -8,24 +8,41 @@ public class Zombie : MonoBehaviour
     Animator animator;
     NavMeshAgent agent;
     public Player player;
-    // Start is called before the first frame update
+    public int hp = 100;
+
+    float timer = 0f;
     void Start()
     {
         animator = GetComponent<Animator>();
         agent = GetComponent<NavMeshAgent>();
     }
-
-    // Update is called once per frame
     void Update()
     {
-        agent.SetDestination(player.transform.position);
-        if(agent.velocity.magnitude > 0)
+        hp = Mathf.Clamp(hp, 0, 1000);
+        animator.SetInteger("Hp", hp);
+        if (hp > 0)
         {
-            animator.SetBool("IsWalking",true);
+            if (timer > 0.5f)
+            {
+                agent.SetDestination(player.transform.position);
+                timer = 0f;
+            }
+            if (agent.velocity.magnitude > 0)
+            {
+                animator.SetBool("IsWalking", true);
+            }
+            else
+            {
+                animator.SetBool("IsWalking", false);
+            }
         }
         else
         {
-            animator.SetBool("IsWalking",false);
+            agent.SetDestination(transform.position);
+            Destroy(gameObject,2.5f);
         }
+        print("Hp: "+hp);
+        timer += Time.deltaTime;
+
     }
 }

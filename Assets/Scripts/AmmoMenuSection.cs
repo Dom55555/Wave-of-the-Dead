@@ -9,9 +9,8 @@ public class AmmoMenuSection : MonoBehaviour
     public TMP_Text ammoName;
     public TMP_Text currentAmount;
     public TMP_Text buyAmount;
-    public TMP_Text buyButtonText;
     public Image ammoImage;
-    public Button buyButton;
+    public Button buyBtn;
     public Slider slider;
     
     public Gamemanager game;
@@ -20,30 +19,61 @@ public class AmmoMenuSection : MonoBehaviour
     string chosenAmmo;
     int ammoAmount = 10;
     float startpos;
+    bool changingColor = false;
+    float timer1 = 999f;
+
     void Start()
     {
         startpos = ammoIcons[0].transform.localPosition.y;
         OnScrolling(0);
     }
+    void Update()
+    {
+        if (timer1 < 1f)
+        {
+            timer1 += Time.deltaTime;
+            print(timer1);
+            if (timer1 > 1f)
+            {
+                buyBtn.image.color = Color.white;
+            }
+        }
+        if (changingColor)
+        {
+            buyBtn.image.color = Color.Lerp(buyBtn.image.color, new Color(0.5f, 1f, 0.5f), Time.deltaTime * 7);
+            if (buyBtn.image.color.r <= 0.6f)
+            {
+                changingColor = false;
+            }
+        }
+        else if (timer1>1f)
+        {
+            buyBtn.image.color = Color.Lerp(buyBtn.image.color, Color.white, Time.deltaTime * 6.2f);
+            if(buyBtn.image.color.r >=0.95f)
+            {
+                buyBtn.image.color = Color.white;
+            }
+        }
+    }
 
     public void AmmoChosen(string name)
     {
         ammoImage.gameObject.SetActive(true);
-        buyButton.gameObject.SetActive(true);
+        buyBtn.gameObject.SetActive(true);
         slider.gameObject.SetActive(true);
 
         chosenAmmo = name;
         ammoName.text = chosenAmmo;
         currentAmount.text = "Left: " + game.playerAmmo[chosenAmmo].totalAmount.ToString();
         buyAmount.text = "Amount: " + ammoAmount;
-        buyButtonText.text = "Buy for " + game.playerAmmo[chosenAmmo].price * ammoAmount + " $";
+        buyBtn.GetComponentInChildren<TMP_Text>().text = "Buy for " + game.playerAmmo[chosenAmmo].price * ammoAmount + " $";
         ammoImage.sprite = Resources.Load<Sprite>($"Images/Ammo/{name}");
     }
     public void OnChangingAmount(float value)
     {
         ammoAmount = (int)value;
         buyAmount.text = "Amount: " + ammoAmount;
-        buyButtonText.text = "Buy for " + game.playerAmmo[chosenAmmo].price * ammoAmount + " $";
+        buyBtn.GetComponentInChildren<TMP_Text>().text = "Buy for " + game.playerAmmo[chosenAmmo].price * ammoAmount + " $";
 
     }
     public void OnOpenMenu()
@@ -65,10 +95,15 @@ public class AmmoMenuSection : MonoBehaviour
             game.Money -= game.playerAmmo[chosenAmmo].price * ammoAmount;
             game.playerAmmo[chosenAmmo].totalAmount += ammoAmount;
             currentAmount.text = "Left: "+game.playerAmmo[chosenAmmo].totalAmount.ToString();
+            if(buyBtn.image.color == Color.white || buyBtn.image.color == new Color(1, 0.48f, 0.48f))
+            {
+                changingColor = true;
+            }
         }
         else
         {
-            print("Not enough money");
+            timer1 = 0;
+            buyBtn.image.color = new Color(1, 0.48f, 0.48f);
         }
     }
     public void OnScrolling(float value)

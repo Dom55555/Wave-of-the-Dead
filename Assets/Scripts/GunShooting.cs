@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using Unity.VisualScripting;
 using UnityEditor.Build.Content;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GunShooting : MonoBehaviour
 {
@@ -65,7 +66,6 @@ public class GunShooting : MonoBehaviour
         {
             currentGun.transform.Find("Flames").GetComponent<ParticleSystem>().Stop();
         }
-
         //reloading
         if (Input.GetKeyDown(KeyCode.R) && !reloading && !game.inMenu && loadedAmmo < maxSize && totalAmmo > 0)
         {
@@ -80,9 +80,15 @@ public class GunShooting : MonoBehaviour
         }
         foreach(var gun in game.guns)
         {
-            gun.Value.firerateTimer = gun.Value.firerateTimer + Time.deltaTime;
+            if(gun.Value.firerateTimer<fireRate)
+            {
+                gun.Value.firerateTimer += Time.deltaTime;
+            }
         }
-        reloadTimer += Time.deltaTime;
+        if (reloadTimer < game.guns[currentGun.name].reloadTime)
+        {
+            reloadTimer += Time.deltaTime;
+        }
     }
 
     void Shoot()
@@ -114,7 +120,7 @@ public class GunShooting : MonoBehaviour
         {
             if(currentGun.name == "Shotgun"||currentGun.name == "Spas-12")
             {
-                Quaternion spread = Quaternion.Euler(new Vector3(Random.Range(-1.5f, 1.5f),Random.Range(-1.5f, 1.5f),0f));
+                Quaternion spread = Quaternion.Euler(new Vector3(Random.Range(-2.5f, 2.5f),Random.Range(-2.5f, 2.5f),0f));
                 direction = spread * direction;
             }
             GameObject bullet;
@@ -138,7 +144,10 @@ public class GunShooting : MonoBehaviour
     }
     public void ChangeGun(GameObject newGun)
     {
-        Destroy(currentGun); 
+        if(currentGun != null)
+        {
+            Destroy(currentGun); 
+        }
         reloading = false;
         reloadTimer = 0;
         currentGun = Instantiate(newGun, gunSlot.position, playerCamera.transform.rotation);
@@ -147,7 +156,7 @@ public class GunShooting : MonoBehaviour
         currentGun.name = newGun.name;
         if(currentGun.name == "Pistol")
         {
-            fireRate = 0.11f;
+            fireRate = 0.1f;
         }
         else
         {

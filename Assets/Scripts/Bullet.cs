@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    public float speed = 28f;        
+    public float speed = 18f;        
     public float lifetime = 1f;     
     public float damage = 10f;    
     public string gunType = "Pistol";
@@ -27,6 +27,14 @@ public class Bullet : MonoBehaviour
     {
         if(collision.gameObject.name != "PLAYER")
         {
+            if (collision.collider.CompareTag("Body"))
+            {
+                collision.gameObject.GetComponent<Zombie>().hp -= (int)damage;
+            }
+            if(collision.collider.CompareTag("Head"))
+            {
+                collision.gameObject.GetComponent<Zombie>().hp -= (int)(2*damage);
+            }
             Destroy(gameObject);
         }
     }

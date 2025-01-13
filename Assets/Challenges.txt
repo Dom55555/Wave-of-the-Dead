@@ -1,2 +1,9 @@
+new things:
 
-Camera center and shooting properly with Ray
+Instantiate (clones creating)
+
+Camera center and shooting properly with RayCasting
+
+Rect Mask 2D
+
+Animator

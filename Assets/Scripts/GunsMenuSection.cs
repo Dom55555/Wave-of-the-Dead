@@ -15,7 +15,9 @@ public class GunsMenuSection: MonoBehaviour
     public TMP_Text firerate;
     public TMP_Text ammoType;
     public Image image;
-    public Button button;
+    public Button getBtn;
+    public Button primaryBtn;
+    public Button secondaryBtn;
 
     public GunShooting player;
     public Gamemanager game;
@@ -23,17 +25,47 @@ public class GunsMenuSection: MonoBehaviour
     List<Button> guns;
     float startpos;
     string chosenGun;
+    float timer1 = 999f;
+    bool changingColor = false;
 
     void Start()
     {
         startpos = guns[0].transform.localPosition.y;
         OnScrolling(0);
     }
+    void Update()
+    {
+        if (timer1 < 1f)
+        {
+            timer1 += Time.deltaTime;
+            if (timer1 > 1f)
+            {
+                getBtn.image.color = Color.white;
+            }
+        }
+        if (changingColor)
+        {
+            getBtn.image.color = Color.Lerp(getBtn.image.color, new Color(0.5f, 1f, 0.5f), Time.deltaTime * 7);
+            if (getBtn.image.color.r <= 0.6f)
+            {
+                changingColor = false;
+            }
+        }
+        else if (timer1 > 1f)
+        {
+            getBtn.image.color = Color.Lerp(getBtn.image.color, Color.white, Time.deltaTime * 6.2f);
+            if (getBtn.image.color.r >= 0.95f)
+            {
+                getBtn.image.color = Color.white;
+            }
+        }
+    }
     public void GunChosen(string name)
     {
-        button.gameObject.SetActive(true);
+        getBtn.gameObject.SetActive(true);
         image.gameObject.SetActive(true);
         chosenGun = name;
+        CheckOwned();
         gunName.text = name;
         damage.text = "Damage: " + game.guns[name].damage.ToString();
         if(chosenGun == "Shotgun"||chosenGun == "Spas-12")
@@ -49,6 +81,10 @@ public class GunsMenuSection: MonoBehaviour
         GameObject gunPrefab = Resources.Load<GameObject>($"GunPrefabs/{chosenGun}");
         if (game.guns[chosenGun].owned)
         {
+            if (getBtn.image.color == Color.white || getBtn.image.color == new Color(1, 0.48f, 0.48f))
+            {
+                changingColor = true;
+            }
             player.ChangeGun(gunPrefab);
         }
         else
@@ -57,6 +93,11 @@ public class GunsMenuSection: MonoBehaviour
             {
                 game.Money -= game.guns[chosenGun].price;
                 game.guns[chosenGun].owned = true;
+                CheckOwned();
+                if (getBtn.image.color == Color.white || getBtn.image.color == new Color(1, 0.48f, 0.48f))
+                {
+                    changingColor = true;
+                }
                 Button gun = guns.Find(gun=>gun.name==chosenGun);
                 TMP_Text[] texts = gun.GetComponentsInChildren<TMP_Text>();
                 texts[1].text = "Owned";
@@ -64,7 +105,8 @@ public class GunsMenuSection: MonoBehaviour
             }
             else
             {
-                print("Not enough money");
+                timer1 = 0;
+                getBtn.image.color = new Color(1, 0.48f, 0.48f);
             }
         }
     }
@@ -94,6 +136,14 @@ public class GunsMenuSection: MonoBehaviour
             {
                 texts[1].text = "Owned";
             }
+        }
+    }
+    private void CheckOwned()
+    {
+        getBtn.GetComponentInChildren<TMP_Text>().text = "Buy";
+        if (game.guns[chosenGun].owned)
+        {
+            getBtn.GetComponentInChildren<TMP_Text>().text = "Take";
         }
     }
 }
