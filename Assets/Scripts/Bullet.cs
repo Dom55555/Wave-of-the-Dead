@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    public float speed = 18f;        
-    public float lifetime = 1f;     
-    public float damage = 10f;    
+    public float speed = 18;        
+    public float lifetime = 1;     
+    public float damage = 10;    
     public string gunType = "Pistol";
 
     void Start()
@@ -18,9 +18,13 @@ public class Bullet : MonoBehaviour
     void Update()
     {
         transform.Translate(Vector3.forward * speed * Time.deltaTime);
-        if (gunType == "Shotgun" || gunType == "Spas-12")
+        if (gunType == "Shotgun")
         {
-            damage = Mathf.Clamp(damage-Time.deltaTime*20,0,25);
+            damage = Mathf.Clamp(damage-Time.deltaTime * 40,0,20);
+        }
+        if (gunType == "Spas-12")
+        {
+            damage = Mathf.Clamp(damage - Time.deltaTime * 70, 0, 35);
         }
     }
     void OnCollisionEnter(Collision collision)
@@ -29,11 +33,11 @@ public class Bullet : MonoBehaviour
         {
             if (collision.collider.CompareTag("Body"))
             {
-                collision.gameObject.GetComponent<Zombie>().hp -= (int)damage;
+                collision.gameObject.GetComponent<Zombie>().getDamage((int)damage);
             }
             if(collision.collider.CompareTag("Head"))
             {
-                collision.gameObject.GetComponent<Zombie>().hp -= (int)(2*damage);
+                collision.gameObject.GetComponent<Zombie>().getDamage((int)(damage*2));
             }
             Destroy(gameObject);
         }

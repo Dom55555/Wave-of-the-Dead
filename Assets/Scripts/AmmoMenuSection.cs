@@ -20,7 +20,7 @@ public class AmmoMenuSection : MonoBehaviour
     int ammoAmount = 10;
     float startpos;
     bool changingColor = false;
-    float timer1 = 999f;
+    float timer1 = 999;
 
     void Start()
     {
@@ -55,7 +55,6 @@ public class AmmoMenuSection : MonoBehaviour
             }
         }
     }
-
     public void AmmoChosen(string name)
     {
         ammoImage.gameObject.SetActive(true);

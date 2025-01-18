@@ -7,3 +7,6 @@ Camera center and shooting properly with RayCasting
 Rect Mask 2D
 
 Animator
+
+Guns props:
+Name Price Damage Firerate AmmoType MagazineSize ReloadTime RecoilPower Automatic/not

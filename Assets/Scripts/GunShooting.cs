@@ -21,6 +21,7 @@ public class GunShooting : MonoBehaviour
     public bool reloading = false;
 
     Transform gunMuzzle;
+    GameObject bullet;
     float reloadTimer = 0f;
 
     void Start()
@@ -71,11 +72,15 @@ public class GunShooting : MonoBehaviour
         {
             reloading = true;
             reloadTimer = 0f;
+            game.reloadingIcon.gameObject.SetActive(true);
+            game.ammoText.gameObject.SetActive(false);
         }
         if(reloading && reloadTimer > game.guns[currentGun.name].reloadTime)
         {
             ReloadGun();
             reloading=false;
+            game.reloadingIcon.gameObject.SetActive(false);
+            game.ammoText.gameObject.SetActive(true);
             reloadTimer = 0f;
         }
         foreach(var gun in game.guns)
@@ -88,6 +93,7 @@ public class GunShooting : MonoBehaviour
         if (reloadTimer < game.guns[currentGun.name].reloadTime)
         {
             reloadTimer += Time.deltaTime;
+            game.reloadingIcon.transform.Rotate(0,0,-480*Time.deltaTime);
         }
     }
 
@@ -123,7 +129,6 @@ public class GunShooting : MonoBehaviour
                 Quaternion spread = Quaternion.Euler(new Vector3(Random.Range(-2.5f, 2.5f),Random.Range(-2.5f, 2.5f),0f));
                 direction = spread * direction;
             }
-            GameObject bullet;
             if(currentGun.name!="Flamethrower")
             {
                 bullet = Instantiate(defaultBulletPrefab, gunMuzzle.position, Quaternion.LookRotation(direction));

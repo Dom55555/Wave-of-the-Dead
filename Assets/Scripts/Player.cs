@@ -6,8 +6,10 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
-    public float moveSpeed = 3f;
-    public float mouseSensitivity = 2f;
+    public int hp;
+
+    public float moveSpeed = 3;
+    public float mouseSensitivity = 2;
 
     public bool cursorVisible = false;
 
@@ -16,13 +18,13 @@ public class Player : MonoBehaviour
     public Gamemanager game;
     public GameObject arms;
 
-    float verticalRotation = 0f;
-    float recoilToReach = 0f;
-    float currentRecoil = 0f;
-    float recoilReachSpeed = 50f;
-    float recoilReturnSpeed = 6f;
-    float recoilDecreaseSpeed = 3f;
-    float currentArmsRotation = 0f;
+    float verticalRotation = 0;
+    float recoilToReach = 0;
+    float currentRecoil = 0;
+    float recoilReachSpeed = 50;
+    float recoilReturnSpeed = 6;
+    float recoilDecreaseSpeed = 3;
+    float currentArmsRotation = 0;
     bool armsRotating = false;
     bool reachedRecoilRotation = true;
     Rigidbody rb;

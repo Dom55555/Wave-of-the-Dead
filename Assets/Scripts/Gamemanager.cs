@@ -3,26 +3,38 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 public class Gamemanager : MonoBehaviour
 {
     public Player player;
-    public GameObject playerObject;
-    public TMP_Text moneyText;
 
+    public TMP_Text moneyText;
     public TMP_Text ammoText;
     public TMP_Text gunNameText;
 
     public GameObject shop;
     public GameObject gunsMenu;
     public GameObject ammoMenu;
+    public Image screenFrame;
+    public Image reloadingIcon;
 
     public int Money = 0;
+    public int Tokens = 0;
     public bool inMenu = false;
+    public bool buildMode = false;
+    public string primaryGun;
+    public string secondaryGun;
 
     public Dictionary<string,Gun>guns = new Dictionary<string,Gun>();
     public Dictionary<string,Ammo> playerAmmo = new Dictionary<string,Ammo>();
+
+    bool changingColor = false;
+    Color buildColor = new Color(1,1,0,0.156f);
+    Color damageColor = new Color(1,0,0,0.235f);
+    Color normalColor = new Color(1,0,0,0);
+    float timer = 0f;
 
     public class Gun
     {
@@ -72,7 +84,7 @@ public class Gamemanager : MonoBehaviour
     void Start()
     {
         TextAsset textAsset = Resources.Load<TextAsset>("GunsProperties");
-        string[] lines = textAsset.text.Split(new char[] { '\n', '\r' }, System.StringSplitOptions.RemoveEmptyEntries);
+        string[] lines = textAsset.text.Split(new char[] {'\n'}, System.StringSplitOptions.RemoveEmptyEntries);
         foreach (var line in lines)
         {
             string[] parts = line.Split();
@@ -90,7 +102,7 @@ public class Gamemanager : MonoBehaviour
     }
     public void Update()
     {
-        string currentGunName = playerObject.GetComponent<GunShooting>().currentGun.name;
+        string currentGunName = player.gameObject.GetComponent<GunShooting>().currentGun.name;
         if (true)
         {
             if (Input.GetKeyDown(KeyCode.F))
@@ -98,16 +110,55 @@ public class Gamemanager : MonoBehaviour
                 player.ToggleCursor();
                 ShopActivate();
             }
-            else if (Input.GetKeyDown(KeyCode.Alpha2))
+            if(Input.GetKeyDown(KeyCode.T))
             {
-                GameObject newGunPrefab = Resources.Load<GameObject>("GunPrefabs/Shotgun");
-                playerObject.GetComponent<GunShooting>().ChangeGun(newGunPrefab);
+                BuildMode();
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha1) && primaryGun!=null)
+            {
+                GameObject newGunPrefab = Resources.Load<GameObject>($"GunPrefabs/{primaryGun}");
+                player.gameObject.GetComponent<GunShooting>().ChangeGun(newGunPrefab);
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha2) && secondaryGun!=null)
+            {
+                GameObject newGunPrefab = Resources.Load<GameObject>($"GunPrefabs/{secondaryGun}");
+                player.gameObject.GetComponent<GunShooting>().ChangeGun(newGunPrefab);
             }
         }
         moneyText.text = Money.ToString()+"$";
         gunNameText.text = currentGunName;
         ammoText.text = guns[currentGunName].currentMagazine.ToString() + " / " + guns[currentGunName].magazineSize.ToString() + " (" + playerAmmo[guns[currentGunName].ammoType].totalAmount.ToString() + ")";
 
+        //screen color and transparency
+        if(changingColor)
+        {
+            timer += 2 * Time.deltaTime;
+            if (buildMode)
+            {
+                screenFrame.color = Color.Lerp(buildColor, damageColor, timer);
+            }
+            else
+            {
+                screenFrame.color = Color.Lerp(normalColor, damageColor, timer);
+            }
+            if(timer>1)
+            {
+                changingColor = false;
+                timer = 0;
+            }
+        }
+        else if (timer<=1 && screenFrame.color != normalColor)
+        {
+            timer += 2 * Time.deltaTime;
+            if (buildMode)
+            {
+                screenFrame.color = Color.Lerp(damageColor, buildColor, timer);
+            }
+            else
+            {
+                screenFrame.color = Color.Lerp(damageColor, normalColor, timer);
+            }
+        }
     }
     void ShopActivate()
     {
@@ -121,5 +172,15 @@ public class Gamemanager : MonoBehaviour
         {
             ammoMenu.SetActive(false);
         }
+    }
+    public void PlayerDamaged()
+    {
+        timer = 0;
+        changingColor = true;
+    }
+    public void BuildMode()
+    {
+        buildMode = !buildMode;
+        screenFrame.color = buildMode?buildColor:normalColor;
     }
 }

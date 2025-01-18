@@ -27,6 +27,7 @@ public class GunsMenuSection: MonoBehaviour
     string chosenGun;
     float timer1 = 999f;
     bool changingColor = false;
+    Color buttonSetColor = new Color(0.22f, 0.8f, 1);
 
     void Start()
     {
@@ -64,9 +65,23 @@ public class GunsMenuSection: MonoBehaviour
     {
         getBtn.gameObject.SetActive(true);
         image.gameObject.SetActive(true);
+        primaryBtn.gameObject.SetActive(true);
+        secondaryBtn.gameObject.SetActive(true);
         chosenGun = name;
-        CheckOwned();
         gunName.text = name;
+        CheckOwned();
+        primaryBtn.image.color = Color.white;
+        secondaryBtn.image.color = Color.white;
+
+        if(chosenGun == game.primaryGun)
+        {
+            primaryBtn.image.color = buttonSetColor;
+        }
+        if(chosenGun == game.secondaryGun)
+        {
+            secondaryBtn.image.color = buttonSetColor;
+        }
+
         damage.text = "Damage: " + game.guns[name].damage.ToString();
         if(chosenGun == "Shotgun"||chosenGun == "Spas-12")
         {
@@ -144,6 +159,33 @@ public class GunsMenuSection: MonoBehaviour
         if (game.guns[chosenGun].owned)
         {
             getBtn.GetComponentInChildren<TMP_Text>().text = "Take";
+        }
+    }
+    public void SetGunSlot(int slot)
+    {
+        if (!game.guns[chosenGun].owned)
+        {
+            return;
+        }
+        if(slot == 1)
+        {
+            game.primaryGun = chosenGun;
+            primaryBtn.image.color = buttonSetColor;
+            if(secondaryBtn.image.color == buttonSetColor)
+            {
+                secondaryBtn.image.color = Color.white;
+                game.secondaryGun = null;
+            }
+        }
+        if(slot == 2)
+        {
+            game.secondaryGun = chosenGun;
+            secondaryBtn.image.color = buttonSetColor;
+            if (primaryBtn.image.color == buttonSetColor)
+            {
+                primaryBtn.image.color = Color.white;
+                game.primaryGun = null;
+            }
         }
     }
 }

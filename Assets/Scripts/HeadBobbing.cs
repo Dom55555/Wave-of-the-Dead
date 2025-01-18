@@ -4,14 +4,14 @@ using UnityEngine;
 
 public class HeadBobbing : MonoBehaviour
 {
-    public float bobbingSpeed = 14f;
+    public float bobbingSpeed = 14;
     public float bobbingAmount = 0.028f;
     public float returnSpeed = 1.5f;
     public Transform arms;
 
     private float defaultCameraYPosition;
     private float defaultArmsYPosition;
-    private float timer = 0f;
+    private float timer = 0;
 
     void Start()
     {
