@@ -35,7 +35,7 @@ public class GunShooting : MonoBehaviour
         int maxSize= game.guns[currentGun.name].magazineSize;
         int totalAmmo = game.playerAmmo[game.guns[currentGun.name].ammoType].totalAmount;
         //shooting
-        if(!game.inMenu && game.guns[currentGun.name].firerateTimer >= fireRate && !reloading && loadedAmmo > 0)
+        if(!game.inMenu && game.guns[currentGun.name].firerateTimer >= fireRate && !reloading && loadedAmmo > 0 && !game.buildMode)
         {
             if (!game.guns[currentGun.name].isAutomatic)
             {
@@ -68,7 +68,7 @@ public class GunShooting : MonoBehaviour
             currentGun.transform.Find("Flames").GetComponent<ParticleSystem>().Stop();
         }
         //reloading
-        if (Input.GetKeyDown(KeyCode.R) && !reloading && !game.inMenu && loadedAmmo < maxSize && totalAmmo > 0)
+        if (Input.GetKeyDown(KeyCode.R) && !reloading && !game.inMenu && loadedAmmo < maxSize && totalAmmo > 0 && !game.buildMode)
         {
             reloading = true;
             reloadTimer = 0f;
@@ -79,9 +79,12 @@ public class GunShooting : MonoBehaviour
         {
             ReloadGun();
             reloading=false;
-            game.reloadingIcon.gameObject.SetActive(false);
-            game.ammoText.gameObject.SetActive(true);
             reloadTimer = 0f;
+            if(!game.buildMode)
+            {
+                game.reloadingIcon.gameObject.SetActive(false);
+                game.ammoText.gameObject.SetActive(true);
+            }
         }
         foreach(var gun in game.guns)
         {
@@ -181,5 +184,9 @@ public class GunShooting : MonoBehaviour
         }
         game.guns[currentGun.name].currentMagazine = currentMagazineAmount + reloadAmount;
         game.playerAmmo[ammoType].totalAmount = totalAmmo - reloadAmount;
+    }
+    public void ToggleGun(bool visible)
+    {
+        currentGun.gameObject.SetActive(visible);
     }
 }

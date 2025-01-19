@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    public float speed = 18;        
+    public float speed = 16;        
     public float lifetime = 1;     
     public float damage = 10;    
     public string gunType = "Pistol";

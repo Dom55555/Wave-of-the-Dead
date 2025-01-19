@@ -7,6 +7,7 @@ using Unity.VisualScripting.Antlr3.Runtime.Tree;
 using UnityEditor.Callbacks;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
 
 public class GunsMenuSection: MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class GunsMenuSection: MonoBehaviour
     public TMP_Text damage;
     public TMP_Text firerate;
     public TMP_Text ammoType;
+    public TMP_Text magazineSize;
     public Image image;
     public Button getBtn;
     public Button primaryBtn;
@@ -89,6 +91,7 @@ public class GunsMenuSection: MonoBehaviour
         }
         firerate.text = "Firerate: " + game.guns[name].firerate.ToString()+"s";
         ammoType.text = "Ammo: " + game.guns[name].ammoType;
+        magazineSize.text = "Magazine size: " + game.guns[name].magazineSize.ToString();
         image.sprite = Resources.Load<Sprite>($"Images/Guns/{name}");
     }
     public void GetGun()
@@ -104,24 +107,47 @@ public class GunsMenuSection: MonoBehaviour
         }
         else
         {
-            if (game.Money >= game.guns[chosenGun].price)
+            if (game.guns[chosenGun].tokenUnlocked)
             {
-                game.Money -= game.guns[chosenGun].price;
-                game.guns[chosenGun].owned = true;
-                CheckOwned();
-                if (getBtn.image.color == Color.white || getBtn.image.color == new Color(1, 0.48f, 0.48f))
+                if (game.Money >= game.guns[chosenGun].price)
                 {
-                    changingColor = true;
+                    game.Money -= game.guns[chosenGun].price;
+                    game.guns[chosenGun].owned = true;
+                    CheckOwned();
+                    if (getBtn.image.color == Color.white || getBtn.image.color == new Color(1, 0.48f, 0.48f))
+                    {
+                        changingColor = true;
+                    }
+                    Button gun = guns.Find(gun=>gun.name==chosenGun);
+                    TMP_Text[] texts = gun.GetComponentsInChildren<TMP_Text>();
+                    texts[1].text = "Owned";
+                    player.ChangeGun(gunPrefab);
                 }
-                Button gun = guns.Find(gun=>gun.name==chosenGun);
-                TMP_Text[] texts = gun.GetComponentsInChildren<TMP_Text>();
-                texts[1].text = "Owned";
-                player.ChangeGun(gunPrefab);
+                else
+                {
+                    timer1 = 0;
+                    getBtn.image.color = new Color(1, 0.48f, 0.48f);
+                }
             }
             else
             {
-                timer1 = 0;
-                getBtn.image.color = new Color(1, 0.48f, 0.48f);
+                if (game.Tokens >= game.guns[chosenGun].tokenPrice)
+                {
+                    game.Tokens -= game.guns[chosenGun].tokenPrice;
+                    game.guns[chosenGun].tokenUnlocked = true;
+                    Button currentGun = guns.FirstOrDefault(a => a.name == chosenGun);
+                    currentGun.transform.Find("locked").gameObject.SetActive(false);
+                    CheckOwned();
+                    if (getBtn.image.color == Color.white || getBtn.image.color == new Color(1, 0.48f, 0.48f))
+                    {
+                        changingColor = true;
+                    }
+                }
+                else
+                {
+                    timer1 = 0;
+                    getBtn.image.color = new Color(1, 0.48f, 0.48f);
+                }
             }
         }
     }
@@ -159,6 +185,10 @@ public class GunsMenuSection: MonoBehaviour
         if (game.guns[chosenGun].owned)
         {
             getBtn.GetComponentInChildren<TMP_Text>().text = "Take";
+        }
+        if (!game.guns[chosenGun].tokenUnlocked)
+        {
+            getBtn.GetComponentInChildren<TMP_Text>().text = "Unlock";
         }
     }
     public void SetGunSlot(int slot)

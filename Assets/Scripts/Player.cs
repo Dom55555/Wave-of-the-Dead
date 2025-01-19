@@ -6,7 +6,8 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
-    public int hp;
+    public int hp = 100;
+    public int hpLimit = 100;
 
     public float moveSpeed = 3;
     public float mouseSensitivity = 2;

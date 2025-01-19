@@ -32,7 +32,6 @@ public class AmmoMenuSection : MonoBehaviour
         if (timer1 < 1f)
         {
             timer1 += Time.deltaTime;
-            print(timer1);
             if (timer1 > 1f)
             {
                 buyBtn.image.color = Color.white;
@@ -64,8 +63,7 @@ public class AmmoMenuSection : MonoBehaviour
         chosenAmmo = name;
         ammoName.text = chosenAmmo;
         currentAmount.text = "Left: " + game.playerAmmo[chosenAmmo].totalAmount.ToString();
-        buyAmount.text = "Amount: " + ammoAmount;
-        buyBtn.GetComponentInChildren<TMP_Text>().text = "Buy for " + game.playerAmmo[chosenAmmo].price * ammoAmount + " $";
+        OnChangingAmount(slider.value);
         ammoImage.sprite = Resources.Load<Sprite>($"Images/Ammo/{name}");
     }
     public void OnChangingAmount(float value)
