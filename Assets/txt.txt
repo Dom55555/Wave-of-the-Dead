@@ -1,0 +1,14 @@
+new things:
+
+Instantiate (clones creating)
+
+Camera center and shooting properly with RayCasting
+
+Rect Mask 2D
+
+Animator
+
+ZOMBIE NAV MESH AGENT LOGIC 
+
+Guns props:
+Name Price Damage Firerate AmmoType MagazineSize ReloadTime RecoilPower Automatic/not UnlockedWithTokens/not TokensPrice

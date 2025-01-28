@@ -269,10 +269,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1d8a5544af9527c4399a75bc04d0ae8a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 28
-  lifetime: 1
-  damage: 10
-  gunType: Pistol
+  speed: 1.5
+  lifetime: 2
+  damage: 3
+  gunType: Flamethrower
 --- !u!65 &7052441096222866056
 BoxCollider:
   m_ObjectHideFlags: 0

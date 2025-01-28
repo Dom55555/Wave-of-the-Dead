@@ -2,15 +2,16 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
-using Unity.VisualScripting;
-using Unity.VisualScripting.Antlr3.Runtime.Tree;
-using UnityEditor.Callbacks;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 
 public class GunsMenuSection: MonoBehaviour
 {
+
+    public GunShooting player;
+    public Gamemanager game;
+
     public TMP_Text gunName;
     public TMP_Text damage;
     public TMP_Text firerate;
@@ -21,27 +22,58 @@ public class GunsMenuSection: MonoBehaviour
     public Button primaryBtn;
     public Button secondaryBtn;
 
-    public GunShooting player;
-    public Gamemanager game;
-
     List<Button> guns;
     float startpos;
     string chosenGun;
-    float timer1 = 999f;
+    float colorTimer = 999f;
     bool changingColor = false;
     Color buttonSetColor = new Color(0.22f, 0.8f, 1);
 
+    //sounds
+    AudioClip switchSound;
+    AudioClip selectSound;
+    AudioClip buySound;
+    AudioClip errorSound;
+    AudioClip unlockSound;
+
     void Start()
     {
+        guns = new List<Button>(transform.Find("Guns").GetComponentsInChildren<Button>());
+        foreach (var gun in guns)
+        {
+            TMP_Text[] texts = gun.GetComponentsInChildren<TMP_Text>();
+            texts[1].text = game.guns[gun.name].price.ToString() + "$";
+            if (game.guns[gun.name].owned)
+            {
+                texts[1].text = "Owned";
+            }
+            if (game.guns[gun.name].name == "LaserGun" && game.guns["LaserGun"].tokenUnlocked)
+            {
+                gun.transform.Find("locked").gameObject.SetActive(false);
+            }
+            if (game.guns[gun.name].name == "Flamethrower" && game.guns["Flamethrower"].tokenUnlocked)
+            {
+                gun.transform.Find("locked").gameObject.SetActive(false);
+            }
+            if (game.guns[gun.name].name == "RPG" && game.guns["RPG"].tokenUnlocked)
+            {
+                gun.transform.Find("locked").gameObject.SetActive(false);
+            }
+        }
         startpos = guns[0].transform.localPosition.y;
         OnScrolling(0);
+        switchSound = Resources.Load<AudioClip>("Sounds/Switch");
+        selectSound = Resources.Load<AudioClip>("Sounds/Select");
+        buySound = Resources.Load<AudioClip>("Sounds/Bought");
+        errorSound = Resources.Load<AudioClip>("Sounds/Error");
+        unlockSound = Resources.Load<AudioClip>("Sounds/Unlocked");
     }
     void Update()
     {
-        if (timer1 < 1f)
+        if (colorTimer < 1f)
         {
-            timer1 += Time.deltaTime;
-            if (timer1 > 1f)
+            colorTimer += Time.deltaTime;
+            if (colorTimer > 1f)
             {
                 getBtn.image.color = Color.white;
             }
@@ -54,7 +86,7 @@ public class GunsMenuSection: MonoBehaviour
                 changingColor = false;
             }
         }
-        else if (timer1 > 1f)
+        else if (colorTimer > 1f)
         {
             getBtn.image.color = Color.Lerp(getBtn.image.color, Color.white, Time.deltaTime * 6.2f);
             if (getBtn.image.color.r >= 0.95f)
@@ -71,6 +103,7 @@ public class GunsMenuSection: MonoBehaviour
         secondaryBtn.gameObject.SetActive(true);
         chosenGun = name;
         gunName.text = name;
+        game.PlaySound(selectSound, false);
         CheckOwned();
         primaryBtn.image.color = Color.white;
         secondaryBtn.image.color = Color.white;
@@ -103,6 +136,7 @@ public class GunsMenuSection: MonoBehaviour
             {
                 changingColor = true;
             }
+
             player.ChangeGun(gunPrefab);
         }
         else
@@ -113,6 +147,7 @@ public class GunsMenuSection: MonoBehaviour
                 {
                     game.Money -= game.guns[chosenGun].price;
                     game.guns[chosenGun].owned = true;
+                    game.PlaySound(buySound,true);
                     CheckOwned();
                     if (getBtn.image.color == Color.white || getBtn.image.color == new Color(1, 0.48f, 0.48f))
                     {
@@ -121,11 +156,12 @@ public class GunsMenuSection: MonoBehaviour
                     Button gun = guns.Find(gun=>gun.name==chosenGun);
                     TMP_Text[] texts = gun.GetComponentsInChildren<TMP_Text>();
                     texts[1].text = "Owned";
-                    player.ChangeGun(gunPrefab);
+                    player.ChangeGun(gunPrefab,true);
                 }
                 else
                 {
-                    timer1 = 0;
+                    colorTimer = 0;
+                    game.PlaySound(errorSound, false);
                     getBtn.image.color = new Color(1, 0.48f, 0.48f);
                 }
             }
@@ -134,9 +170,23 @@ public class GunsMenuSection: MonoBehaviour
                 if (game.Tokens >= game.guns[chosenGun].tokenPrice)
                 {
                     game.Tokens -= game.guns[chosenGun].tokenPrice;
+                    PlayerPrefs.SetInt("Tokens", game.Tokens);
+                    if(chosenGun=="LaserGun")
+                    {
+                        PlayerPrefs.SetInt("LaserGun",1);
+                    }
+                    if (chosenGun == "Flamethrower")
+                    {
+                        PlayerPrefs.SetInt("Flamethrower", 1);
+                    }
+                    if (chosenGun == "RPG")
+                    {
+                        PlayerPrefs.SetInt("RPG", 1);
+                    }
                     game.guns[chosenGun].tokenUnlocked = true;
                     Button currentGun = guns.FirstOrDefault(a => a.name == chosenGun);
                     currentGun.transform.Find("locked").gameObject.SetActive(false);
+                    game.PlaySound(unlockSound,true);
                     CheckOwned();
                     if (getBtn.image.color == Color.white || getBtn.image.color == new Color(1, 0.48f, 0.48f))
                     {
@@ -145,7 +195,8 @@ public class GunsMenuSection: MonoBehaviour
                 }
                 else
                 {
-                    timer1 = 0;
+                    colorTimer = 0;
+                    game.PlaySound(errorSound,false);
                     getBtn.image.color = new Color(1, 0.48f, 0.48f);
                 }
             }
@@ -154,7 +205,7 @@ public class GunsMenuSection: MonoBehaviour
     public void OnScrolling(float value)
     {
         int i = 0;
-        float parentHeight = this.gameObject.GetComponent<RectTransform>().rect.height; 
+        float parentHeight = this.gameObject.GetComponent<RectTransform>().rect.height;
         foreach (var gun in guns)
         {
             float y = startpos - (i / 2) * (parentHeight * 0.2f) + value * parentHeight;
@@ -165,19 +216,6 @@ public class GunsMenuSection: MonoBehaviour
     public void OnOpenMenu()
     {
         this.gameObject.SetActive(true);
-        if(guns==null)
-        {
-            guns = new List<Button>(transform.Find("Guns").GetComponentsInChildren<Button>());
-        }
-        foreach (var gun in guns)
-        {
-            TMP_Text[] texts = gun.GetComponentsInChildren<TMP_Text>();
-            texts[1].text = game.guns[gun.name].price.ToString() + "$";
-            if (game.guns[gun.name].owned)
-            {
-                texts[1].text = "Owned";
-            }
-        }
     }
     private void CheckOwned()
     {
@@ -197,7 +235,8 @@ public class GunsMenuSection: MonoBehaviour
         {
             return;
         }
-        if(slot == 1)
+        game.PlaySound(switchSound, false);
+        if (slot == 1)
         {
             game.primaryGun = chosenGun;
             primaryBtn.image.color = buttonSetColor;

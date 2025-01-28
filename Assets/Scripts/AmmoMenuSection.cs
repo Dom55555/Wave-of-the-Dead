@@ -22,10 +22,20 @@ public class AmmoMenuSection : MonoBehaviour
     bool changingColor = false;
     float timer1 = 999;
 
+    //sounds
+    AudioClip changeAmountSound;
+    AudioClip buySound;
+    AudioClip errorSound;
+    AudioClip selectSound;
     void Start()
     {
+        ammoIcons = new List<Button>(transform.Find("Ammo").GetComponentsInChildren<Button>());
         startpos = ammoIcons[0].transform.localPosition.y;
         OnScrolling(0);
+        changeAmountSound = Resources.Load<AudioClip>("Sounds/Scroll");
+        buySound = Resources.Load<AudioClip>("Sounds/Bought");
+        errorSound = Resources.Load<AudioClip>("Sounds/Error");
+        selectSound = Resources.Load<AudioClip>("Sounds/Select");
     }
     void Update()
     {
@@ -63,11 +73,13 @@ public class AmmoMenuSection : MonoBehaviour
         chosenAmmo = name;
         ammoName.text = chosenAmmo;
         currentAmount.text = "Left: " + game.playerAmmo[chosenAmmo].totalAmount.ToString();
+        game.PlaySound(selectSound,false);
         OnChangingAmount(slider.value);
         ammoImage.sprite = Resources.Load<Sprite>($"Images/Ammo/{name}");
     }
     public void OnChangingAmount(float value)
     {
+        game.PlaySound(changeAmountSound, false);
         ammoAmount = (int)value;
         buyAmount.text = "Amount: " + ammoAmount;
         buyBtn.GetComponentInChildren<TMP_Text>().text = "Buy for " + game.playerAmmo[chosenAmmo].price * ammoAmount + " $";
@@ -76,10 +88,6 @@ public class AmmoMenuSection : MonoBehaviour
     public void OnOpenMenu()
     {
         this.gameObject.SetActive(true);
-        if (ammoIcons == null)
-        {
-            ammoIcons = new List<Button>(transform.Find("Ammo").GetComponentsInChildren<Button>());
-        }
         if(chosenAmmo!=null)
         {
             currentAmount.text = "Left: " + game.playerAmmo[chosenAmmo].totalAmount.ToString();
@@ -87,11 +95,12 @@ public class AmmoMenuSection : MonoBehaviour
     }
     public void Buy()
     {
-        if(game.Money>= game.playerAmmo[chosenAmmo].price * ammoAmount) // price * amount
+        if(game.Money>= game.playerAmmo[chosenAmmo].price * ammoAmount)
         {
             game.Money -= game.playerAmmo[chosenAmmo].price * ammoAmount;
             game.playerAmmo[chosenAmmo].totalAmount += ammoAmount;
             currentAmount.text = "Left: "+game.playerAmmo[chosenAmmo].totalAmount.ToString();
+            game.PlaySound(buySound,true);
             if(buyBtn.image.color == Color.white || buyBtn.image.color == new Color(1, 0.48f, 0.48f))
             {
                 changingColor = true;
@@ -101,6 +110,7 @@ public class AmmoMenuSection : MonoBehaviour
         {
             timer1 = 0;
             buyBtn.image.color = new Color(1, 0.48f, 0.48f);
+            game.PlaySound(errorSound,false);
         }
     }
     public void OnScrolling(float value)

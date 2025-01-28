@@ -6,18 +6,21 @@ using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
+    public Gamemanager game;
+    
     public int hp = 100;
-    public int hpLimit = 100;
 
-    public float moveSpeed = 3;
+    public float maxSpeed = 3;
+    public float currentSpeed = 3;
     public float mouseSensitivity = 2;
 
     public bool cursorVisible = false;
 
     public Transform cameraTransform;
     public Image aim;
-    public Gamemanager game;
     public GameObject arms;
+    public List<GameObject>currentSlowingTraps = new List<GameObject>();
+
 
     float verticalRotation = 0;
     float recoilToReach = 0;
@@ -29,6 +32,7 @@ public class Player : MonoBehaviour
     bool armsRotating = false;
     bool reachedRecoilRotation = true;
     Rigidbody rb;
+    AudioSource audioSource;
 
     void Start()
     {
@@ -36,10 +40,16 @@ public class Player : MonoBehaviour
         Cursor.visible = false;
         aim.gameObject.SetActive(true);
         rb = GetComponent<Rigidbody>();
+        audioSource = GetComponent<AudioSource>();
     }
 
     void Update()
     {
+        if(hp<=0)
+        {
+            audioSource.Stop();
+            return;
+        }
         MovePlayer();
         if (!cursorVisible)
         {
@@ -79,8 +89,16 @@ public class Player : MonoBehaviour
 
     void MovePlayer()
     {
-        Vector2 velocity = new Vector2(Input.GetAxis("Horizontal") * moveSpeed, Input.GetAxis("Vertical") * moveSpeed);
+        Vector2 velocity = new Vector2(Input.GetAxis("Horizontal") * currentSpeed, Input.GetAxis("Vertical") * currentSpeed);
         rb.velocity = transform.rotation * new Vector3(velocity.x, rb.velocity.y, velocity.y);
+        if (rb.velocity.magnitude>0.3f && audioSource.isPlaying==false)
+        {
+            audioSource.Play();
+        }
+        else if (rb.velocity.magnitude<=0.3f)
+        {
+            audioSource.Stop();
+        }
     }
 
     void MouseRotateCamera()

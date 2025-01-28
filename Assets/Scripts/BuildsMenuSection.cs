@@ -6,6 +6,8 @@ using UnityEngine.UI;
 
 public class BuildsMenuSection : MonoBehaviour
 {
+    public Gamemanager game;
+    
     public TMP_Text buildName;
     public TMP_Text currentAmount;
     public TMP_Text buyAmount;
@@ -14,26 +16,34 @@ public class BuildsMenuSection : MonoBehaviour
     public Button buyBtn;
     public Slider slider;
 
-    public Gamemanager game;
-
     List<Button> buildsIcons;
     string chosenBuild;
+    bool changingColor = false;
     int buildAmount = 10;
     float startpos;
-    bool changingColor = false;
-    float timer1 = 999;
+    float colorTimer = 999;
+
+    AudioClip errorSound;
+    AudioClip buySound;
+    AudioClip selectSound;
+    AudioClip changeAmountSound;
 
     void Start()
     {
+        buildsIcons = new List<Button>(transform.Find("Builds").GetComponentsInChildren<Button>());
         startpos = buildsIcons[0].transform.localPosition.y;
         OnScrolling(0);
+        changeAmountSound = Resources.Load<AudioClip>("Sounds/Scroll");
+        buySound = Resources.Load<AudioClip>("Sounds/Bought");
+        errorSound = Resources.Load<AudioClip>("Sounds/Error");
+        selectSound = Resources.Load<AudioClip>("Sounds/Select");
     }
     void Update()
     {
-        if (timer1 < 1f)
+        if (colorTimer < 1f)
         {
-            timer1 += Time.deltaTime;
-            if (timer1 > 1f)
+            colorTimer += Time.deltaTime;
+            if (colorTimer > 1f)
             {
                 buyBtn.image.color = Color.white;
             }
@@ -46,7 +56,7 @@ public class BuildsMenuSection : MonoBehaviour
                 changingColor = false;
             }
         }
-        else if (timer1 > 1f)
+        else if (colorTimer > 1f)
         {
             buyBtn.image.color = Color.Lerp(buyBtn.image.color, Color.white, Time.deltaTime * 6.2f);
             if (buyBtn.image.color.r >= 0.95f)
@@ -64,12 +74,14 @@ public class BuildsMenuSection : MonoBehaviour
         chosenBuild = name;
         buildName.text = chosenBuild;
         currentAmount.text = "Left: " + game.builds[chosenBuild].totalAmount.ToString();
+        game.PlaySound(selectSound, false);
         OnChangingAmount(slider.value);
         buildImage.sprite = Resources.Load<Sprite>($"Images/Builds/{name}");
         tokenImage.gameObject.SetActive(game.builds[chosenBuild].tokenBuild?true:false);
     }
     public void OnChangingAmount(float value)
     {
+        game.PlaySound(changeAmountSound, false);
         buildAmount = (int)value;
         buyAmount.text = "Amount: " + buildAmount;
         TMP_Text textBtn = buyBtn.GetComponentInChildren<TMP_Text>();
@@ -79,10 +91,6 @@ public class BuildsMenuSection : MonoBehaviour
     public void OnOpenMenu()
     {
         this.gameObject.SetActive(true);
-        if (buildsIcons == null)
-        {
-            buildsIcons = new List<Button>(transform.Find("Builds").GetComponentsInChildren<Button>());
-        }
         if (chosenBuild != null)
         {
             currentAmount.text = "Left: " + game.builds[chosenBuild].totalAmount.ToString();
@@ -103,12 +111,14 @@ public class BuildsMenuSection : MonoBehaviour
         }
         else
         {
-            timer1 = 0;
+            game.PlaySound(errorSound, false);
+            colorTimer = 0;
             buyBtn.image.color = new Color(1, 0.48f, 0.48f);
         }
     }
     void OnBuy()
     {
+        game.PlaySound(buySound, true);
         game.builds[chosenBuild].totalAmount += buildAmount;
         currentAmount.text = "Left: " + game.builds[chosenBuild].totalAmount.ToString();
         if (buyBtn.image.color == Color.white || buyBtn.image.color == new Color(1, 0.48f, 0.48f))

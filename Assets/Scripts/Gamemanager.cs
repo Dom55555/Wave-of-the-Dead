@@ -10,6 +10,7 @@ public class Gamemanager : MonoBehaviour
 {
     public Player player;
     public Buildsmanager buildsManager;
+    public UpgradesManager upgradesManager;
 
     public TMP_Text moneyText;
     public TMP_Text tokensText;
@@ -22,7 +23,9 @@ public class Gamemanager : MonoBehaviour
     public GameObject gunsMenu;
     public GameObject ammoMenu;
     public GameObject buildsMenu;
+    public GameObject upgradesMenu;
 
+    public GameObject gunNameBar;
     public Image screenFrame;
     public Image reloadingIcon;
     public Image hpBar;
@@ -32,22 +35,28 @@ public class Gamemanager : MonoBehaviour
     public int Tokens = 0;
     public bool inMenu = false;
     public bool buildMode = false;
-    public string primaryGun;
-    public string secondaryGun;
+    public string primaryGun = "";
+    public string secondaryGun = "";
 
     public Dictionary<string,Gun>guns = new Dictionary<string,Gun>();
     public Dictionary<string,Ammo> playerAmmo = new Dictionary<string,Ammo>();
     public Dictionary<string,Build> builds = new Dictionary<string,Build>();
 
     bool changingColor = false;
+    bool changingPlayerHp = false;
+    bool currentOverlap = true;
+    int currentHp = 100;
+    int lastHp = 100;
+    float colorTimer = 0f;
+    float hpTimer = 0f;
+
     Color buildColor = new Color(1,1,0,0.05f);
     Color damageColor = new Color(1,0,0,0.2f);
     Color normalColor = new Color(1,0,0,0);
-    float timer = 0f;
-
     Color maxHpColor = new Color(0.196f,0.627f,0.196f);
     Color zeroHpColor = new Color(0.745f,0.157f,0.157f);
 
+    AudioClip zombieAttackSound;
     public class Gun
     {
         public string name;
@@ -124,10 +133,11 @@ public class Gamemanager : MonoBehaviour
         playerAmmo.Add("12gauge", new Ammo("12gauge", 10, 0));
         playerAmmo.Add("7.62mm", new Ammo("7.62mm", 11, 0));
         playerAmmo.Add("4.6mm", new Ammo("4.6mm", 8, 0));
-        playerAmmo.Add("5.56mm", new Ammo("5.56mm", 14, 0));
+        playerAmmo.Add("5.56mm", new Ammo("5.56mm", 12, 0));
         playerAmmo.Add("44Magnum", new Ammo("44Magnum", 8, 0));
-        playerAmmo.Add("?", new Ammo("?", 5, 0));
-        playerAmmo.Add("??", new Ammo("??", 5, 0));
+        playerAmmo.Add("Rocket", new Ammo("Rocket", 100, 0));
+        playerAmmo.Add("EnergyCell", new Ammo("EnergyCell", 5, 999999999));
+        playerAmmo.Add("Fuel", new Ammo("Fuel", 0, 0));
 
         builds.Add("WoodenBlock",new Build("WoodenBlock",false,500,0));
         builds.Add("MetalBlock", new Build("MetalBlock", false, 5000, 0));
@@ -135,14 +145,30 @@ public class Gamemanager : MonoBehaviour
         builds.Add("DamageTrap", new Build("DamageTrap", true, 2, 0));
         builds.Add("C4", new Build("C4", true, 3, 0));
 
-        ChangeBarHp(100);
+        zombieAttackSound = Resources.Load<AudioClip>("Sounds/ZombieAttack");
+
+        LoadSaves();
+        ChangeCurrentHpNumber();
     }
     public void Update()
     {
+        if(player.hp==0 && changingPlayerHp)
+        {
+            ChangeCurrentHpNumber();
+            return;
+        }
+        if(player.hp==0)
+        {
+            return;
+        }
         string currentGunName = player.gameObject.GetComponent<GunShooting>().currentGun.name;
         if(Input.GetKeyDown(KeyCode.T) && !inMenu)
         {
             BuildMode();
+        }
+        if(Input.GetKeyDown(KeyCode.Y))
+        {
+            Application.Quit();
         }
         if(!buildMode)
         {
@@ -151,112 +177,119 @@ public class Gamemanager : MonoBehaviour
                 player.ToggleCursor();
                 ShopActivate();
             }
-            if (Input.GetKeyDown(KeyCode.Alpha1) && primaryGun!=null)
+            if (Input.GetKeyDown(KeyCode.Alpha1) && primaryGun!="")
             {
                 GameObject newGunPrefab = Resources.Load<GameObject>($"GunPrefabs/{primaryGun}");
-                reloadingIcon.gameObject.SetActive(false);
-                ammoText.gameObject.SetActive(true);
                 player.gameObject.GetComponent<GunShooting>().ChangeGun(newGunPrefab);
             }
-            else if (Input.GetKeyDown(KeyCode.Alpha2) && secondaryGun!=null)
+            else if (Input.GetKeyDown(KeyCode.Alpha2) && secondaryGun!="")
             {
                 GameObject newGunPrefab = Resources.Load<GameObject>($"GunPrefabs/{secondaryGun}");
-                reloadingIcon.gameObject.SetActive(false);
-                ammoText.gameObject.SetActive(true);
                 player.gameObject.GetComponent<GunShooting>().ChangeGun(newGunPrefab);
             }
         }
         moneyText.text = Money.ToString()+"$";
         tokensText.text = Tokens.ToString();
         gunNameText.text = currentGunName;
-        ammoText.text = guns[currentGunName].currentMagazine.ToString() + " / " + guns[currentGunName].magazineSize.ToString() + " (" + playerAmmo[guns[currentGunName].ammoType].totalAmount.ToString() + ")";
+
+        string totalAmountString;
+        if(playerAmmo[guns[currentGunName].ammoType].totalAmount>999999)
+        {
+            totalAmountString = "\u221E";
+        }
+        else
+        {
+            totalAmountString = playerAmmo[guns[currentGunName].ammoType].totalAmount.ToString();
+        }
+        ammoText.text = guns[currentGunName].currentMagazine.ToString() + " / " + guns[currentGunName].magazineSize.ToString() + " (" + totalAmountString+ ")";
+
         ScreenColor();
         if (moneyAddText.gameObject.activeSelf)
         {
             MoneyTextAnimation();
         }
+        if(changingPlayerHp)
+        {
+            ChangeCurrentHpNumber();
+        }
     }
-    void ShopActivate()
+    public void ShopActivate()
     {
         shop.SetActive(!shop.activeSelf);
         inMenu = !inMenu;
-        if(gunsMenu.activeSelf)
-        {
-            gunsMenu.SetActive(false);
-        }
-        if(ammoMenu.activeSelf)
-        {
-            ammoMenu.SetActive(false);
-        }
-        if(buildsMenu.activeSelf)
-        {
-            buildsMenu.SetActive(false);
-        }
+        gunsMenu.SetActive(false);
+        ammoMenu.SetActive(false);
+        buildsMenu.SetActive(false);
+        upgradesMenu.SetActive(false);
     }
-    public void PlayerDamaged()
+    public void PlayerDamaged(int damage, bool upgradeBought = false)
     {
-        timer = 0;
-        changingColor = true;
+        colorTimer = 0;
+        if(damage >0)
+        {
+            changingColor = true;
+        }
+        changingPlayerHp = true;
+        lastHp = player.hp;
+        if (player.hp>0 && !upgradeBought)
+        {
+            PlaySound(zombieAttackSound, true);
+        }
+        player.hp = Mathf.Clamp(player.hp-damage,0,250);
     }
     public void BuildMode()
     {
         buildMode = !buildMode;
         screenFrame.color = buildMode?buildColor:normalColor;
         ammoText.gameObject.SetActive(!buildMode);
+        gunNameBar.SetActive(!buildMode);
         gunNameText.gameObject.SetActive(!buildMode);
         reloadingIcon.gameObject.SetActive(false);
         buildsManager.BuildMode();
     }
-    public void ChangeBarHp(int hp)
+    void ChangeCurrentHpNumber()
     {
-        if (hp >= player.hpLimit / 2)
+        hpTimer+= Time.deltaTime * 3;
+        currentHp = (int)Mathf.Lerp(lastHp, player.hp, hpTimer);
+        if (currentHp == player.hp)
         {
-            hpBar.color = Color.Lerp(Color.yellow, maxHpColor, hp / (float)player.hpLimit);
+            changingPlayerHp = false;
+            hpTimer = 0;
+        }
+        if (currentHp >= upgradesManager.maxPlayerHp / 2)
+        {
+            hpBar.color = Color.Lerp(Color.yellow, maxHpColor, currentHp / (float)upgradesManager.maxPlayerHp);
         }
         else
         {
-            hpBar.color = Color.Lerp(zeroHpColor, Color.yellow, hp / ((float)player.hpLimit / 2));
+            hpBar.color = Color.Lerp(zeroHpColor, Color.yellow, currentHp / ((float)upgradesManager.maxPlayerHp / 2));
         }
-        hpBar.rectTransform.sizeDelta = new Vector2(200f * hp / (float)player.hpLimit, hpBar.rectTransform.sizeDelta.y);
-        hpText.text = hp + " / " + player.hpLimit;
+        hpBar.rectTransform.sizeDelta = new Vector2(200f * currentHp / (float)upgradesManager.maxPlayerHp, hpBar.rectTransform.sizeDelta.y);
+        hpText.text = currentHp + " / " + upgradesManager.maxPlayerHp;
     }
     public void GetMoney(int moneyAmount)
     {
-        Money += moneyAmount;
+        Money += (int)(moneyAmount*upgradesManager.moneyMultiplier);
         moneyAddText.gameObject.SetActive(true);
         moneyAddText.GetComponent<TMP_Text>().color = new Color(0.255f, 0.94f, 0, 1);
-        moneyAddText.GetComponent<TMP_Text>().text = "+"+moneyAmount.ToString()+"$";
+        moneyAddText.GetComponent<TMP_Text>().text = "+"+ ((int)(moneyAmount*upgradesManager.moneyMultiplier)).ToString()+"$";
     }
     void ScreenColor()
     {
         if (changingColor)
         {
-            timer += 2 * Time.deltaTime;
-            if (buildMode)
-            {
-                screenFrame.color = Color.Lerp(buildColor, damageColor, timer);
-            }
-            else
-            {
-                screenFrame.color = Color.Lerp(normalColor, damageColor, timer);
-            }
-            if (timer > 1)
+            colorTimer += 2 * Time.deltaTime;
+            screenFrame.color = Color.Lerp(buildMode?buildColor:normalColor,damageColor, colorTimer);
+            if (colorTimer > 1)
             {
                 changingColor = false;
-                timer = 0;
+                colorTimer = 0;
             }
         }
-        else if (timer <= 1 && screenFrame.color != normalColor)
+        else if (colorTimer <= 1 && screenFrame.color != normalColor)
         {
-            timer += 2 * Time.deltaTime;
-            if (buildMode)
-            {
-                screenFrame.color = Color.Lerp(damageColor, buildColor, timer);
-            }
-            else
-            {
-                screenFrame.color = Color.Lerp(damageColor, normalColor, timer);
-            }
+            colorTimer += 2 * Time.deltaTime;
+            screenFrame.color = Color.Lerp(damageColor,buildMode?buildColor:normalColor,colorTimer);
         }
     }
     void MoneyTextAnimation()
@@ -270,8 +303,44 @@ public class Gamemanager : MonoBehaviour
             moneyAddText.gameObject.SetActive(false);
         }
     }
-    void GameOver()
+    public void PlaySound(AudioClip clip, bool overlap)
     {
-
+        if(!currentOverlap && !overlap && transform.GetComponent<AudioSource>().isPlaying)
+        {
+            return;
+        }
+        transform.GetComponent<AudioSource>().PlayOneShot(clip);
+        currentOverlap = overlap;
+    }
+    void LoadSaves()
+    {
+        if (!PlayerPrefs.HasKey("Played"))
+        {
+            PlayerPrefs.SetInt("Played", 1);
+            PlayerPrefs.SetInt("HpUpgrade", 1);
+            PlayerPrefs.SetInt("TrapsUpgrade", 1);
+            PlayerPrefs.SetInt("MoneyUpgrade", 1);
+            PlayerPrefs.SetInt("Tokens",9999);
+            PlayerPrefs.SetInt("LaserGun",0);
+            PlayerPrefs.SetInt("Flamethrower",0);
+            PlayerPrefs.SetInt("RPG",0);
+        }
+        upgradesManager.owned[0] = PlayerPrefs.GetInt("HpUpgrade");
+        upgradesManager.owned[1] = PlayerPrefs.GetInt("TrapsUpgrade");
+        upgradesManager.owned[2] = PlayerPrefs.GetInt("MoneyUpgrade");
+        if(PlayerPrefs.GetInt("LaserGun")==1)
+        {
+            guns["LaserGun"].tokenUnlocked = true;
+        }
+        if (PlayerPrefs.GetInt("Flamethrower") == 1)
+        {
+            guns["Flamethrower"].tokenUnlocked = true;
+        }
+        if (PlayerPrefs.GetInt("RPG") == 1)
+        {
+            guns["RPG"].tokenUnlocked = true;
+        }
+        Tokens = PlayerPrefs.GetInt("Tokens");
+        upgradesManager.ChangeValues();
     }
 }

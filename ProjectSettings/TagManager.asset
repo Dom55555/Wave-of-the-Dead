@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Head
   - Body
+  - Block
   layers:
   - Default
   - TransparentFX
@@ -15,11 +16,11 @@ TagManager:
   - UI
   - Player
   - Gun
-  - 
-  - 
-  - 
-  - 
-  - 
+  - Block
+  - UnplacedBlock
+  - Zombie
+  - Text
+  - Arms
   - 
   - 
   - 

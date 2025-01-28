@@ -4,14 +4,15 @@ using UnityEngine;
 
 public class HeadBobbing : MonoBehaviour
 {
+    public Transform arms;
+    public Player player;
     public float bobbingSpeed = 14;
     public float bobbingAmount = 0.028f;
     public float returnSpeed = 1.5f;
-    public Transform arms;
 
-    private float defaultCameraYPosition;
-    private float defaultArmsYPosition;
-    private float timer = 0;
+    float defaultCameraYPosition;
+    float defaultArmsYPosition;
+    float timer = 0;
 
     void Start()
     {
@@ -21,6 +22,11 @@ public class HeadBobbing : MonoBehaviour
 
     void Update()
     {
+        if(player.hp==0)
+        {
+            arms.gameObject.SetActive(false);
+            return;
+        }
         float horizontal = Input.GetAxis("Horizontal");
         float vertical = Input.GetAxis("Vertical");
 
